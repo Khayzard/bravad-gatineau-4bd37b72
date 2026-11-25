@@ -583,7 +583,7 @@
             <label class="champ">Montant de l'Option retour du nouvel appareil $
               <input type="text" class="f-option-retour-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false">
             </label>
-            <label class="champ">Montant du financement du téléphone $
+            <label class="champ">Montant financement mensuel $
               <input type="text" class="f-financement-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false">
             </label>
           </div>
@@ -1138,7 +1138,7 @@
             var montOpt = parseMontant(($(".f-option-retour-nouvel", ligne) || {}).value);
             if (isFinite(montOpt)) block.push("Montant de l'Option retour du nouvel appareil : " + formatArgentFr(montOpt) + " $");
             var montFin = parseMontant(($(".f-financement-nouvel", ligne) || {}).value);
-            if (isFinite(montFin)) block.push("Montant du financement du téléphone : " + formatArgentFr(montFin) + " $");
+            if (isFinite(montFin)) block.push("Montant financement mensuel : " + formatArgentFr(montFin) + " $");
           } else {
             block.push("Option retour du nouvel appareil : Non");
           }
@@ -1330,7 +1330,7 @@
                 }
                 var montFinEl = $(".f-financement-nouvel", ligne);
                 if (montFinEl && !isFinite(parseMontant(montFinEl.value))) {
-                  add("Montant du financement du téléphone $", montFinEl, g);
+                  add("Montant financement mensuel $", montFinEl, g);
                 }
               }
             }
