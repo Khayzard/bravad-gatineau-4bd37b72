@@ -460,15 +460,26 @@
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend>Transaction</legend>
+          <div class="grille">
+            <label class="champ plein" for="type-transaction">Type de transaction
+              <select id="type-transaction" name="type-transaction">
+                <option value="">Choisir un type de transaction</option>
+              </select>
+            </label>
+            <label class="champ plein" id="wrap-type-transaction-autre" hidden for="type-transaction-autre">Préciser le type de transaction
+              <input type="text" id="type-transaction-autre" name="type-transaction-autre" autocomplete="off">
+            </label>
+          </div>
+
+          <fieldset id="wrap-nature-transaction" hidden style="margin-top: 16px;">
+            <legend>Opération liée</legend>
             <div class="choix">
-              <label><input type="radio" name="transaction" value="activation"> Activation</label>
-              <label><input type="radio" name="transaction" value="renouvellement"> Renouvellement</label>
+              <label><input type="radio" name="nature-transaction" value="activation"> Activation</label>
+              <label><input type="radio" name="nature-transaction" value="renouvellement"> Renouvellement</label>
             </div>
           </fieldset>
 
-          <fieldset id="wrap-type-activation" hidden>
+          <fieldset id="wrap-type-activation" hidden style="margin-top: 16px;">
             <legend class="visually-hidden">Ouverture ou ajout de ligne</legend>
             <div class="choix">
               <label><input type="radio" name="type-activation" value="nouveau"> Ouverture d'un nouveau compte</label>
@@ -480,7 +491,7 @@
 
       <div id="reste" hidden>
         <section class="bloc">
-          <div class="bloc-titre">Entente et compte</div>
+          <div class="bloc-titre">Entente, compte et client</div>
           <div class="bloc-corps">
             <fieldset>
               <legend>Entente</legend>
@@ -491,6 +502,15 @@
             </fieldset>
 
             <div class="grille">
+              <label class="champ" for="nom-titulaire">Nom du titulaire du compte
+                <input type="text" id="nom-titulaire" name="nom-titulaire" autocomplete="off">
+              </label>
+              <label class="champ" for="utilisateur-autorise">Utilisateur autorisé (si différent)
+                <input type="text" id="utilisateur-autorise" name="utilisateur-autorise" autocomplete="off" placeholder="Laisser vide si titulaire">
+              </label>
+              <label class="champ plein" for="courriel-client">Courriel du client (pour eversign)
+                <input type="email" id="courriel-client" name="courriel-client" autocomplete="off" spellcheck="false">
+              </label>
               <label class="champ" for="numero-compte"># de compte
                 <input type="text" id="numero-compte" name="numero-compte" autocomplete="off" spellcheck="false">
                 <span class="aide" id="aide-compte" hidden>Compte temporaire créé par le rep (enquête de crédit déjà faite)</span>
@@ -500,12 +520,13 @@
               </label>
             </div>
 
-            <label class="champ" id="wrap-neq" hidden for="neq">NEQ
+            <label class="champ" id="wrap-neq" hidden for="neq" style="margin-top: 12px;">NEQ
               <input type="text" id="neq" name="neq" autocomplete="off" spellcheck="false">
             </label>
 
-            <label class="champ" id="wrap-evs" hidden for="evs">Codes EVS
+            <label class="champ" id="wrap-evs" hidden for="evs" style="margin-top: 12px;">Code(s) EVS complet(s)
               <textarea id="evs" name="evs" rows="4" autocomplete="off" spellcheck="false"></textarea>
+              <span class="aide">Inscrire le code EVS au complet tel qu'affiché au dossier.</span>
             </label>
           </div>
         </section>
@@ -515,6 +536,45 @@
           <div class="bloc-corps">
             <div id="lignes"></div>
             <button type="button" class="btn-secondaire" id="btn-ajouter">+ Ajouter une ligne</button>
+          </div>
+        </section>
+
+        <section class="bloc" id="bloc-montants-confirmations">
+          <div class="bloc-titre">Montants attendus, frais AVPA et confirmations</div>
+          <div class="bloc-corps">
+            <div class="grille" style="margin-bottom: 16px;">
+              <label class="champ" for="montant-mensuel-attendu">Mensualité totale attendue (avant taxes) $
+                <input type="text" id="montant-mensuel-attendu" name="montant-mensuel-attendu" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
+              </label>
+              <label class="champ" for="montant-magasin-attendu">Montant à payer maintenant en magasin $
+                <input type="text" id="montant-magasin-attendu" name="montant-magasin-attendu" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
+              </label>
+            </div>
+
+            <fieldset>
+              <legend>Frais AVPA</legend>
+              <div class="choix choix-3">
+                <label><input type="radio" name="frais-avpa" value="Logistique de base 39,50 $"> Logistique de base 39,50 $</label>
+                <label><input type="radio" name="frais-avpa" value="Complet 69,50 $"> Complet 69,50 $</label>
+                <label><input type="radio" name="frais-avpa" value="Total 94,50 $"> Total 94,50 $</label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Fonctions perdues expliquées au client?</legend>
+              <div class="choix">
+                <label><input type="radio" name="fonctions-perdues" value="oui"> Oui</label>
+                <label><input type="radio" name="fonctions-perdues" value="non"> Non</label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Mise en service</legend>
+              <div class="choix">
+                <label><input type="radio" name="mise-en-service" value="maintenant"> Maintenant</label>
+                <label><input type="radio" name="mise-en-service" value="plus-tard"> Plus tard</label>
+              </div>
+            </fieldset>
           </div>
         </section>
       </div>
@@ -541,13 +601,18 @@
       </div>
       <div class="ligne-corps">
         <div class="grille">
-          <label class="champ">Numéro (ou temporaire)
+          <label class="champ">Numéro visé (ou temporaire)
             <input type="text" class="f-numero" autocomplete="off" spellcheck="false">
           </label>
-          <label class="champ">Nom de l'utilisateur
-            <input type="text" class="f-nom" autocomplete="off">
+          <label class="champ">Nom de l'utilisateur (si différent)
+            <input type="text" class="f-nom" autocomplete="off" placeholder="Optionnel si titulaire">
           </label>
           <label class="champ plein">Forfait choisi
+            <select class="f-forfait-select">
+              <option value="">Choisir un forfait</option>
+            </select>
+          </label>
+          <label class="champ plein champ-forfait-autre" hidden>Autre forfait (nom et prix mensuel)
             <input type="text" class="f-forfait" autocomplete="off">
           </label>
         </div>
@@ -571,6 +636,9 @@
           </label>
           <label class="champ champ-couleur">Couleur
             <input type="text" class="f-couleur" autocomplete="off">
+          </label>
+          <label class="champ plein champ-imei">IMEI 1 (sur la boîte)
+            <input type="text" class="f-imei" inputmode="numeric" maxlength="20" autocomplete="off" spellcheck="false" placeholder="15 chiffres exacts (IMEI 1)">
           </label>
           <fieldset class="plein">
             <legend>Option retour du nouvel appareil</legend>
@@ -604,7 +672,7 @@
 
         <div class="pile bloc-renouvellement" hidden>
           <fieldset>
-            <legend>Le client accepte de payer l'option retour?</legend>
+            <legend>Option retour de l'ancien appareil — le client accepte de la payer?</legend>
             <div class="choix">
               <label><input type="radio" class="opt-retour" value="oui"> Oui</label>
               <label><input type="radio" class="opt-retour" value="non"> Non</label>
@@ -618,6 +686,23 @@
               <label><input type="radio" class="opt-paiement" value="1-coup"> En 1 coup</label>
               <label><input type="radio" class="opt-paiement" value="24-mois"> Financement 24 mois</label>
             </div>
+          </div>
+
+          <div class="sous-champs bloc-soldes-actuel">
+            <label class="champ">Solde d'appareil actuel $
+              <input type="text" class="f-solde-appareil" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
+            </label>
+            <label class="champ">Solde Paiements faciles $
+              <input type="text" class="f-solde-pf" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
+            </label>
+            <span class="aide plein" style="margin-top: 0;">Laisser vide ou à 0 s'il n'y a aucun solde sur l'appareil actuel.</span>
+            <fieldset class="plein wrap-accepte-soldes" hidden>
+              <legend>Le client accepte de payer ces soldes?</legend>
+              <div class="choix">
+                <label><input type="radio" class="opt-accepte-soldes" value="oui"> Oui</label>
+                <label><input type="radio" class="opt-accepte-soldes" value="non"> Non</label>
+              </div>
+            </fieldset>
           </div>
         </div>
 
@@ -656,7 +741,16 @@
             </fieldset>
           </div>
 
-          <label class="case"><input type="checkbox" class="chk-dcc"> Protection DCC</label>
+          <fieldset class="plein bloc-dcc" style="margin-top: 4px;">
+            <legend>Protection DCC</legend>
+            <div class="choix">
+              <label><input type="radio" class="opt-dcc" value="Garder"> Garder</label>
+              <label><input type="radio" class="opt-dcc" value="Ajouter"> Ajouter</label>
+              <label><input type="radio" class="opt-dcc" value="Enlever"> Enlever</label>
+              <label><input type="radio" class="opt-dcc" value="Aucune"> Aucune</label>
+            </div>
+          </fieldset>
+
           <div class="pile bloc-encontinu" hidden>
             <label class="case"><input type="checkbox" class="chk-encontinu"> Forfait EnContinu+ (Stream+)</label>
             <div class="champs-encontinu" hidden>
@@ -677,6 +771,23 @@
   (function () {
     "use strict";
 
+    // =========================================================================
+    // CONFIGURATION FACILE À METTRE À JOUR (types de transaction et forfaits)
+    // Ajouter simplement une nouvelle entrée dans le tableau correspondant
+    // au fil des transactions pour l'afficher dans la liste déroulante.
+    // =========================================================================
+    var TYPES_TRANSACTION = [
+      "Activation",
+      "Renouvellement",
+      "Achat complet",
+      "Aucun acompte complet",
+      "Aucun acompte standard"
+    ];
+
+    var FORFAITS_CONNUS = [
+      "Forfait 60 $"
+    ];
+
     var APPAREILS_GROUPES = [{"marque":"Apple","modeles":[{"nom":"iPhone 18 Pro","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone 18 Pro Max","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone Duo","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone 17e","caps":["256 Go","512 Go"]},{"nom":"iPhone 17","caps":["256 Go","512 Go"]},{"nom":"iPhone 17 Pro","caps":["256 Go","512 Go","1 To"]},{"nom":"iPhone 17 Pro Max","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone Air","caps":["256 Go","512 Go","1 To"]},{"nom":"iPhone 16E","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 16","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 16 Plus","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 16 Pro","caps":["128 Go","256 Go","512 Go","1 To"]},{"nom":"iPhone 16 Pro Max","caps":["256 Go","512 Go","1 To"]},{"nom":"iPhone 15","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 15 Plus","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 15 Pro","caps":["128 Go","256 Go","512 Go","1 To"]},{"nom":"iPhone 15 Pro Max","caps":["256 Go","512 Go","1 To"]}]},{"marque":"Samsung","modeles":[{"nom":"Galaxy A03s","caps":["32 Go"]},{"nom":"Galaxy A17 5G","caps":[]},{"nom":"Galaxy A16 5G","caps":[]},{"nom":"Galaxy A15 5G","caps":[]},{"nom":"Galaxy A14 5G","caps":["64 Go"]},{"nom":"Galaxy A36 5G","caps":[]},{"nom":"Galaxy A35 5G","caps":[]},{"nom":"Galaxy A57 5G","caps":["128 Go"]},{"nom":"Galaxy A56 5G","caps":["128 Go"]},{"nom":"Galaxy A54 5G","caps":["128 Go"]},{"nom":"Galaxy XCover6 Pro","caps":[]},{"nom":"Galaxy S26FE","caps":["128 Go"]},{"nom":"Galaxy S25FE","caps":["128 Go","256 Go"]},{"nom":"Galaxy S24FE 5G","caps":["128 Go","256 Go"]},{"nom":"Galaxy S26","caps":["256 Go","512 Go"]},{"nom":"Galaxy S26 Plus","caps":["256 Go","512 Go"]},{"nom":"Galaxy S26 Ultra","caps":["256 Go","512 Go","1 To"]},{"nom":"Galaxy S25 Edge","caps":["256 Go"]},{"nom":"Galaxy S25","caps":["128 Go","256 Go"]},{"nom":"Galaxy S25+","caps":["256 Go","512 Go"]},{"nom":"Galaxy S25 Ultra","caps":["256 Go","512 Go"]},{"nom":"Galaxy S24","caps":["128 Go","256 Go"]},{"nom":"Galaxy S24+","caps":["256 Go","512 Go"]},{"nom":"Galaxy S24 Ultra","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold8","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Flip8","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Flip7","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold8 Ultra","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold7","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Flip6","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold6","caps":["256 Go","512 Go"]},{"nom":"XCover 7 Pro","caps":[]}]},{"marque":"Google","modeles":[{"nom":"Pixel 11","caps":["256 Go","512 Go"]},{"nom":"Pixel 11 Pro","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 11 Pro XL","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 11 Pro Fold","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 10a","caps":["128 Go"]},{"nom":"Pixel 10","caps":["128 Go","256 Go"]},{"nom":"Pixel 10 Pro","caps":["128 Go","256 Go","512 Go","1 To"]},{"nom":"Pixel 10 Pro XL","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 10 Pro Fold","caps":["256 Go","512 Go"]},{"nom":"Pixel 9a","caps":["128 Go"]},{"nom":"Pixel 9","caps":["128 Go","256 Go"]},{"nom":"Pixel 9 Pro","caps":["128 Go","256 Go"]},{"nom":"Pixel 9 Pro XL","caps":["128 Go","256 Go","512 Go"]},{"nom":"Pixel Pro Fold","caps":["256 Go","512 Go"]},{"nom":"Pixel 8","caps":["128 Go","256 Go"]}]},{"marque":"Motorola","modeles":[{"nom":"Razr 2025","caps":[]},{"nom":"Moto Razr+ (2024)","caps":[]},{"nom":"Razr+","caps":[]},{"nom":"Moto Edge 2026","caps":[]},{"nom":"Moto Edge 2025","caps":[]},{"nom":"Moto Edge 2024","caps":[]},{"nom":"Moto G 2026","caps":[]},{"nom":"Moto G 2025","caps":[]},{"nom":"Moto G 5G (2024)","caps":[]}]},{"marque":"Autres","modeles":[{"nom":"TCL K70 NXTPAPER","caps":[]},{"nom":"TCL Go Flip 6","caps":["8 Go"]},{"nom":"Sonim XP3plus 5G","caps":[]},{"nom":"Sonim XP Pro","caps":["256 Go"]},{"nom":"Sonim XP3plus","caps":["10 Go"]},{"nom":"Sonim XP5plus","caps":[]},{"nom":"Sonim XP10","caps":[]},{"nom":"Nubia Cymbal 2","caps":[]},{"nom":"ZTE Nubia A76","caps":[]},{"nom":"ZTE Nubia Flip 2","caps":[]},{"nom":"ZTE Cymbal 2","caps":[]},{"nom":"ZTE Blade A7P","caps":[]},{"nom":"ZTE Nubia A75","caps":[]}]}];
     var APPAREILS_CAPS = {};
     APPAREILS_GROUPES.forEach(function (g) {
@@ -688,6 +799,10 @@
     var lignesEl = document.getElementById("lignes");
     var tpl = document.getElementById("tpl-ligne");
     var memoEl = document.getElementById("memo");
+    var typeTransSelect = document.getElementById("type-transaction");
+    var wrapTypeTransAutre = document.getElementById("wrap-type-transaction-autre");
+    var inputTypeTransAutre = document.getElementById("type-transaction-autre");
+    var wrapNatureTrans = document.getElementById("wrap-nature-transaction");
     var wrapTypeAct = document.getElementById("wrap-type-activation");
     var choixAvpa = document.getElementById("choix-avpa");
     var aideCompte = document.getElementById("aide-compte");
@@ -722,6 +837,71 @@
       return el && el.value ? String(el.value).trim() : "";
     }
 
+    function remplirSelectTypesTransaction() {
+      if (!typeTransSelect) return;
+      typeTransSelect.innerHTML = "";
+      var ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = "Choisir un type de transaction";
+      typeTransSelect.appendChild(ph);
+      TYPES_TRANSACTION.forEach(function (t) {
+        var opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        typeTransSelect.appendChild(opt);
+      });
+      var autre = document.createElement("option");
+      autre.value = "__autre__";
+      autre.textContent = "Autre (préciser)";
+      typeTransSelect.appendChild(autre);
+    }
+
+    function remplirSelectForfaits(sel) {
+      if (!sel) return;
+      sel.innerHTML = "";
+      var ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = "Choisir un forfait";
+      sel.appendChild(ph);
+      FORFAITS_CONNUS.forEach(function (f) {
+        var opt = document.createElement("option");
+        opt.value = f;
+        opt.textContent = f;
+        sel.appendChild(opt);
+      });
+      var autre = document.createElement("option");
+      autre.value = "__autre__";
+      autre.textContent = "Autre (préciser)";
+      sel.appendChild(autre);
+    }
+
+    function valeurTypeTransaction() {
+      if (!typeTransSelect) return "";
+      if (typeTransSelect.value === "__autre__") return trim(inputTypeTransAutre);
+      return typeTransSelect.value || "";
+    }
+
+    function effectiveNature() {
+      if (!typeTransSelect || !typeTransSelect.value) return "";
+      if (typeTransSelect.value === "Activation") return "activation";
+      if (typeTransSelect.value === "Renouvellement") return "renouvellement";
+      return radio("nature-transaction");
+    }
+
+    function syncForfaitChamps(ligne) {
+      var sel = $(".f-forfait-select", ligne);
+      var wrapAutre = $(".champ-forfait-autre", ligne);
+      if (!sel || !wrapAutre) return;
+      wrapAutre.hidden = sel.value !== "__autre__";
+    }
+
+    function valeurForfait(ligne) {
+      var sel = $(".f-forfait-select", ligne);
+      if (sel && sel.value === "__autre__") return trim($(".f-forfait", ligne));
+      if (sel && sel.value) return sel.value;
+      return trim($(".f-forfait", ligne));
+    }
+
     function addLine() {
       lineSeq += 1;
       var node = tpl.content.firstElementChild.cloneNode(true);
@@ -729,9 +909,12 @@
       $$(".opt-retour", node).forEach(function (r) { r.name = "option-retour-" + lineSeq; });
       $$(".opt-retour-nouvel", node).forEach(function (r) { r.name = "option-retour-nouvel-" + lineSeq; });
       $$(".opt-paiement", node).forEach(function (r) { r.name = "option-paiement-" + lineSeq; });
+      $$(".opt-accepte-soldes", node).forEach(function (r) { r.name = "accepte-soldes-" + lineSeq; });
       $$(".opt-offre", node).forEach(function (r) { r.name = "offre-acceptee-" + lineSeq; });
+      $$(".opt-dcc", node).forEach(function (r) { r.name = "dcc-" + lineSeq; });
       $$(".opt-encontinu", node).forEach(function (r) { r.name = "encontinu-" + lineSeq; });
       $$(".opt-etat-rachat", node).forEach(function (r) { r.name = "etat-rachat-" + lineSeq; });
+      remplirSelectForfaits($(".f-forfait-select", node));
       remplirSelectModeles($(".f-modele-select", node));
       remplirSelectRachat($(".f-rachat-modele", node));
       lignesEl.appendChild(node);
@@ -857,7 +1040,6 @@
     var TAXE_QC = 1.14975;
     var GRILLE_VALIDITE = "du 1er novembre au 31 décembre 2026";
     var GRILLE_REPRISES = [{"categorie":"iPhone","modele":"iPhone SE 2022","beau":30,"defectueux":null,"brise":null},{"categorie":"iPhone","modele":"iPhone 11*","beau":50,"defectueux":30,"brise":null},{"categorie":"iPhone","modele":"iPhone 11 Pro*","beau":60,"defectueux":40,"brise":null},{"categorie":"iPhone","modele":"iPhone 11 Pro Max*","beau":85,"defectueux":65,"brise":null},{"categorie":"iPhone","modele":"iPhone 12*","beau":80,"defectueux":10,"brise":null},{"categorie":"iPhone","modele":"iPhone 12 Pro","beau":180,"defectueux":80,"brise":55},{"categorie":"iPhone","modele":"iPhone 12 Pro Max*","beau":210,"defectueux":110,"brise":56},{"categorie":"iPhone","modele":"iPhone 13 mini*","beau":130,"defectueux":30,"brise":null},{"categorie":"iPhone","modele":"iPhone 13*","beau":155,"defectueux":80,"brise":17},{"categorie":"iPhone","modele":"iPhone 13 Pro","beau":185,"defectueux":85,"brise":40},{"categorie":"iPhone","modele":"iPhone 13 Pro Max*","beau":200,"defectueux":100,"brise":26},{"categorie":"iPhone","modele":"iPhone 14*","beau":175,"defectueux":75,"brise":17},{"categorie":"iPhone","modele":"iPhone 14+","beau":220,"defectueux":120,"brise":86},{"categorie":"iPhone","modele":"iPhone 14 Pro","beau":290,"defectueux":190,"brise":130},{"categorie":"iPhone","modele":"iPhone 14 Pro Max*","beau":375,"defectueux":275,"brise":232},{"categorie":"iPhone","modele":"iPhone 15*","beau":315,"defectueux":165,"brise":95},{"categorie":"iPhone","modele":"iPhone 15+","beau":300,"defectueux":170,"brise":83},{"categorie":"iPhone","modele":"iPhone 15 Pro","beau":510,"defectueux":370,"brise":300},{"categorie":"iPhone","modele":"iPhone 15 Pro Max*","beau":580,"defectueux":430,"brise":361},{"categorie":"iPhone","modele":"iPhone 16e","beau":250,"defectueux":150,"brise":79},{"categorie":"iPhone","modele":"iPhone 16*","beau":455,"defectueux":325,"brise":254},{"categorie":"iPhone","modele":"iPhone 16+","beau":480,"defectueux":350,"brise":268},{"categorie":"iPhone","modele":"iPhone 16 Pro","beau":565,"defectueux":400,"brise":293},{"categorie":"iPhone","modele":"iPhone 16 Pro Max*","beau":675,"defectueux":500,"brise":348},{"categorie":"iPhone","modele":"iPhone 17e","beau":480,"defectueux":355,"brise":250},{"categorie":"iPhone","modele":"iPhone 17","beau":600,"defectueux":475,"brise":54},{"categorie":"iPhone","modele":"iPhone 17 Pro","beau":850,"defectueux":725,"brise":260},{"categorie":"iPhone","modele":"iPhone 17 Pro Max","beau":950,"defectueux":825,"brise":307},{"categorie":"Samsung Galaxy A","modele":"A13","beau":40,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A14","beau":55,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A15","beau":60,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A16","beau":110,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A21/32","beau":30,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A70/A71","beau":20,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A51","beau":20,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A52/A53","beau":55,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A54","beau":80,"defectueux":30,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S20FE","beau":30,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S20/S20+","beau":30,"defectueux":10,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S20 Ultra","beau":50,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S21/S21+","beau":30,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S21 Ultra","beau":90,"defectueux":40,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S21 FE","beau":80,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S22","beau":100,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S22+","beau":105,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S22 Ultra","beau":245,"defectueux":145,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23","beau":160,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23+","beau":175,"defectueux":75,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23 Ultra","beau":310,"defectueux":210,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23 FE","beau":160,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S24 FE","beau":190,"defectueux":90,"brise":20},{"categorie":"Samsung Galaxy S","modele":"S24","beau":220,"defectueux":120,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S24+","beau":320,"defectueux":220,"brise":20},{"categorie":"Samsung Galaxy S","modele":"S24 Ultra","beau":410,"defectueux":310,"brise":20},{"categorie":"Samsung Galaxy S","modele":"S25","beau":350,"defectueux":250,"brise":89},{"categorie":"Samsung Galaxy S","modele":"S25+","beau":360,"defectueux":260,"brise":65},{"categorie":"Samsung Galaxy S","modele":"S25 Ultra","beau":605,"defectueux":505,"brise":218},{"categorie":"Samsung Galaxy Note et Z","modele":"Note 20","beau":25,"defectueux":5,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Note 20 Ultra","beau":50,"defectueux":30,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 3","beau":5,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 4","beau":75,"defectueux":5,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 5","beau":210,"defectueux":110,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 6","beau":210,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 3","beau":175,"defectueux":75,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 4","beau":150,"defectueux":50,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 5","beau":275,"defectueux":175,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 6","beau":275,"defectueux":175,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 5","beau":20,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 6","beau":50,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 6 Pro","beau":20,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 6a","beau":40,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 7","beau":80,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 7 Pro","beau":100,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 7A","beau":20,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 8","beau":110,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 8 Pro","beau":180,"defectueux":80,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 8a","beau":110,"defectueux":60,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 9","beau":175,"defectueux":75,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 9 Pro","beau":320,"defectueux":220,"brise":20},{"categorie":"Google Pixel","modele":"Pixel 9 Pro Fold","beau":550,"defectueux":450,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 9 Pro XL","beau":325,"defectueux":225,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 10","beau":370,"defectueux":270,"brise":106},{"categorie":"Google Pixel","modele":"Pixel 10 Pro","beau":520,"defectueux":420,"brise":92},{"categorie":"Google Pixel","modele":"Pixel 10 Pro XL","beau":665,"defectueux":565,"brise":244}];
-
     var ETAT_LIBELLES = { beau: "Beau", defectueux: "Défectueux", brise: "Brisé" };
 
     function parseMontant(str) {
@@ -874,6 +1056,22 @@
 
     function formatArgentFr(n) {
       return formatArgent(n).replace(".", ",");
+    }
+
+    function aSoldeActuelPositif(ligne) {
+      var sa = parseMontant(($(".f-solde-appareil", ligne) || {}).value);
+      var sp = parseMontant(($(".f-solde-pf", ligne) || {}).value);
+      return (isFinite(sa) && sa > 0) || (isFinite(sp) && sp > 0);
+    }
+
+    function syncSoldesActuels(ligne) {
+      var wrap = $(".wrap-accepte-soldes", ligne);
+      if (!wrap) return;
+      var show = effectiveNature() === "renouvellement" && aSoldeActuelPositif(ligne);
+      wrap.hidden = !show;
+      if (!show) {
+        $$(".opt-accepte-soldes", ligne).forEach(function (r) { r.checked = false; });
+      }
     }
 
     function creditAdditionnel(prixGrille, optionRetour) {
@@ -967,7 +1165,6 @@
       }
     }
 
-
     function defautPrixAvantTaxes(montantTTC) {
       if (!isFinite(montantTTC) || montantTTC < 0) return null;
       return Math.round((montantTTC / TAXE_QC) * 100) / 100;
@@ -979,21 +1176,13 @@
     }
 
     function prixDefautCourant(ligne) {
-      if (radio("transaction") !== "renouvellement") return null;
+      if (effectiveNature() !== "renouvellement") return null;
       if (!optionRetourOui(ligne)) return null;
       var rachat = $(".chk-rachat", ligne);
       if (!rachat || !rachat.checked) return null;
       var montantEl = $(".f-option-montant", ligne);
       if (!montantEl) return null;
       return defautPrixAvantTaxes(parseMontant(montantEl.value));
-    }
-
-    function prixEstModifie(ligne) {
-      var defaut = prixDefautCourant(ligne);
-      if (defaut == null) return false;
-      var actuel = parseMontant(($(".f-rachat-prix", ligne) || {}).value);
-      if (!isFinite(actuel)) return false;
-      return formatArgent(actuel) !== formatArgent(defaut);
     }
 
     function applyPrixDefaut(ligne, saisiePrix) {
@@ -1036,16 +1225,34 @@
 
     function updateVisibility() {
       var typeCompte = radio("type-compte");
-      var transaction = radio("transaction");
+      var typeTransVal = typeTransSelect ? typeTransSelect.value : "";
+      var nature = effectiveNature();
       var typeActivation = radio("type-activation");
 
-      wrapTypeAct.hidden = transaction !== "activation";
+      if (wrapTypeTransAutre) wrapTypeTransAutre.hidden = typeTransVal !== "__autre__";
+      var besoinNature = typeTransVal !== "" && typeTransVal !== "Activation" && typeTransVal !== "Renouvellement";
+      if (wrapNatureTrans) wrapNatureTrans.hidden = !besoinNature;
+      if (!besoinNature) {
+        $$('input[name="nature-transaction"]', form).forEach(function (r) { r.checked = false; });
+      }
 
-      var montrerReste = transaction === "renouvellement" ||
-        (transaction === "activation" && typeActivation !== "");
+      wrapTypeAct.hidden = nature !== "activation";
+      if (nature !== "activation") {
+        $$('input[name="type-activation"]', form).forEach(function (r) { r.checked = false; });
+        typeActivation = "";
+      }
+
+      var montrerReste = false;
+      if (typeTransVal === "Renouvellement") {
+        montrerReste = true;
+      } else if (typeTransVal === "Activation") {
+        montrerReste = typeActivation !== "";
+      } else if (typeTransVal !== "") {
+        montrerReste = true;
+      }
       reste.hidden = !montrerReste;
 
-      if (transaction === "renouvellement") {
+      if (nature === "renouvellement") {
         choixAvpa.hidden = true;
         var entente = radio("entente");
         if (entente === "avpa-byod" || entente === "") {
@@ -1056,33 +1263,37 @@
         choixAvpa.hidden = false;
       }
 
-      aideCompte.hidden = transaction !== "activation";
+      aideCompte.hidden = nature !== "activation";
 
-      wrapNeq.hidden = !(typeCompte === "affaires" && transaction === "activation" && typeActivation === "nouveau");
+      wrapNeq.hidden = !(typeCompte === "affaires" && nature === "activation" && typeActivation === "nouveau");
       wrapEvs.hidden = typeCompte !== "epp";
 
       var isAvpa = radio("entente") === "avpa-byod";
       $$(".ligne", lignesEl).forEach(function (ligne) {
+        syncForfaitChamps(ligne);
+
         var appareils = $(".champs-appareil", ligne);
         if (appareils) appareils.hidden = isAvpa;
         syncAppareilChamps(ligne);
 
         var blocAct = $(".bloc-activation", ligne);
         var blocRen = $(".bloc-renouvellement", ligne);
-        if (blocAct) blocAct.hidden = transaction !== "activation";
-        if (blocRen) blocRen.hidden = transaction !== "renouvellement";
+        if (blocAct) blocAct.hidden = nature !== "activation";
+        if (blocRen) blocRen.hidden = nature !== "renouvellement";
 
         var transfert = $(".chk-transfert", ligne);
         var champsTransfert = $(".champs-transfert", ligne);
         if (champsTransfert) {
-          champsTransfert.hidden = !(transaction === "activation" && transfert && transfert.checked);
+          champsTransfert.hidden = !(nature === "activation" && transfert && transfert.checked);
         }
 
         var optRetour = $$(".opt-retour", ligne).filter(function (r) { return r.checked; });
         var champsOptPay = $(".champs-option-paiement", ligne);
         if (champsOptPay) {
-          champsOptPay.hidden = !(transaction === "renouvellement" && optRetour.length && optRetour[0].value === "oui");
+          champsOptPay.hidden = !(nature === "renouvellement" && optRetour.length && optRetour[0].value === "oui");
         }
+
+        syncSoldesActuels(ligne);
 
         var optRetourNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
         var champsOptNouvel = $(".champs-option-retour-nouvel", ligne);
@@ -1111,7 +1322,7 @@
       updateValidation();
     }
 
-    function ligneMemo(ligne, index, transaction, isAvpa) {
+    function ligneMemo(ligne, index, nature, isAvpa) {
       var block = [];
       var v;
 
@@ -1121,7 +1332,7 @@
       v = trim($(".f-nom", ligne));
       if (v) block.push("Nom de l'utilisateur : " + v);
 
-      v = trim($(".f-forfait", ligne));
+      v = valeurForfait(ligne);
       if (v) block.push("Forfait choisi : " + v);
 
       if (!isAvpa) {
@@ -1131,6 +1342,8 @@
         if (v) block.push("Capacité : " + v);
         v = valeurCouleur(ligne);
         if (v) block.push("Couleur : " + v);
+        v = trim($(".f-imei", ligne));
+        if (v) block.push("IMEI 1 : " + v);
         var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
         if (optNouvel) {
           if (optNouvel.value === "avec") {
@@ -1145,7 +1358,7 @@
         }
       }
 
-      if (transaction === "activation") {
+      if (nature === "activation") {
         if ($(".chk-sim", ligne).checked) block.push("SIM ajoutée au coupon : Oui");
         if ($(".chk-transfert", ligne).checked) {
           block.push("Transfert de numéro : Oui");
@@ -1156,19 +1369,28 @@
         }
       }
 
-      if (transaction === "renouvellement") {
+      if (nature === "renouvellement") {
         var optRetour = $$(".opt-retour", ligne).filter(function (r) { return r.checked; })[0];
         if (optRetour) {
           if (optRetour.value === "oui") {
-            var parts = ["Option retour : Oui"];
+            var parts = ["Option retour (ancien appareil) : Oui"];
             var montantN = parseMontant(($(".f-option-montant", ligne) || {}).value);
             if (isFinite(montantN)) parts.push(formatArgent(montantN) + " $ (taxes incl.)");
             var pay = $$(".opt-paiement", ligne).filter(function (r) { return r.checked; })[0];
             if (pay) parts.push(pay.value === "24-mois" ? "Financement 24 mois" : "En 1 coup");
             block.push(parts.join(" – "));
           } else {
-            block.push("Option retour : Non");
+            block.push("Option retour (ancien appareil) : Non");
           }
+        }
+
+        var sa = parseMontant(($(".f-solde-appareil", ligne) || {}).value);
+        if (isFinite(sa) && sa > 0) block.push("Solde d'appareil actuel : " + formatArgentFr(sa) + " $");
+        var sp = parseMontant(($(".f-solde-pf", ligne) || {}).value);
+        if (isFinite(sp) && sp > 0) block.push("Solde Paiements faciles actuel : " + formatArgentFr(sp) + " $");
+        if (aSoldeActuelPositif(ligne)) {
+          var acc = $$(".opt-accepte-soldes", ligne).filter(function (r) { return r.checked; })[0];
+          if (acc) block.push("Accepte de payer les soldes actuels : " + (acc.value === "oui" ? "Oui" : "Non"));
         }
       }
 
@@ -1182,7 +1404,8 @@
         }
       }
 
-      if ($(".chk-dcc", ligne).checked) block.push("Protection DCC : Oui");
+      var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
+      if (dcc) block.push("Protection DCC : " + dcc.value);
 
       var blocEnc = $(".bloc-encontinu", ligne);
       if (blocEnc && isShown(blocEnc) && $(".chk-encontinu", ligne).checked) {
@@ -1197,24 +1420,44 @@
     function generateMemo() {
       var out = [];
       var typeCompte = radio("type-compte");
-      var transaction = radio("transaction");
+      var typeTransRaw = typeTransSelect ? typeTransSelect.value : "";
+      var typeTransNom = valeurTypeTransaction();
+      var nature = effectiveNature();
       var typeActivation = radio("type-activation");
       var entente = radio("entente");
 
       if (typeCompte) out.push("Type de compte : " + TYPE_LIBELLES[typeCompte]);
 
-      if (transaction === "activation") {
-        var t = "Transaction : Activation";
+      if (typeTransRaw === "Activation") {
+        var t = "Type de transaction : Activation";
         if (typeActivation === "nouveau") t += " — Ouverture d'un nouveau compte";
         else if (typeActivation === "ajout") t += " — Ajout d'une ligne dans un compte existant";
         out.push(t);
-      } else if (transaction === "renouvellement") {
-        out.push("Transaction : Renouvellement");
+      } else if (typeTransRaw === "Renouvellement") {
+        out.push("Type de transaction : Renouvellement");
+      } else if (typeTransNom) {
+        var t2 = "Type de transaction : " + typeTransNom;
+        if (nature === "activation") {
+          t2 += " (Activation";
+          if (typeActivation === "nouveau") t2 += " — Ouverture d'un nouveau compte";
+          else if (typeActivation === "ajout") t2 += " — Ajout d'une ligne dans un compte existant";
+          t2 += ")";
+        } else if (nature === "renouvellement") {
+          t2 += " (Renouvellement)";
+        }
+        out.push(t2);
       }
 
       if (!reste.hidden) {
         if (entente === "2-ans") out.push("Entente : 2 ans");
         else if (entente === "avpa-byod") out.push("Entente : AVPA/BYOD");
+
+        var titulaire = trim(document.getElementById("nom-titulaire"));
+        if (titulaire) out.push("Titulaire : " + titulaire);
+        var autorise = trim(document.getElementById("utilisateur-autorise"));
+        if (autorise) out.push("Utilisateur autorisé : " + autorise);
+        var courriel = trim(document.getElementById("courriel-client"));
+        if (courriel) out.push("Courriel (eversign) : " + courriel);
 
         var compte = trim(document.getElementById("numero-compte"));
         if (compte) out.push("# de compte : " + compte);
@@ -1238,12 +1481,28 @@
 
         var isAvpa = entente === "avpa-byod";
         $$(".ligne", lignesEl).forEach(function (ligne, i) {
-          var block = ligneMemo(ligne, i + 1, transaction, isAvpa);
+          var block = ligneMemo(ligne, i + 1, nature, isAvpa);
           if (block.length) {
             if (out.length) out.push("");
             out = out.concat(block);
           }
         });
+
+        var extras = [];
+        var mensuel = parseMontant((document.getElementById("montant-mensuel-attendu") || {}).value);
+        if (isFinite(mensuel)) extras.push("Mensualité attendue (avant taxes) : " + formatArgentFr(mensuel) + " $");
+        var magasin = parseMontant((document.getElementById("montant-magasin-attendu") || {}).value);
+        if (isFinite(magasin)) extras.push("Montant à payer maintenant en magasin : " + formatArgentFr(magasin) + " $");
+        var fraisAvpa = radio("frais-avpa");
+        if (fraisAvpa) extras.push("Frais AVPA : " + fraisAvpa);
+        var foncPerdues = radio("fonctions-perdues");
+        if (foncPerdues) extras.push("Fonctions perdues expliquées : " + (foncPerdues === "oui" ? "Oui" : "Non"));
+        var miseEnService = radio("mise-en-service");
+        if (miseEnService) extras.push("Mise en service : " + (miseEnService === "maintenant" ? "Maintenant" : "Plus tard"));
+        if (extras.length) {
+          if (out.length) out.push("");
+          out = out.concat(extras);
+        }
       }
 
       return out.join("\n");
@@ -1268,8 +1527,13 @@
       if (!radio("type-compte")) {
         add("Type de compte", $(".choix", $('input[name="type-compte"]').closest("fieldset")));
       }
-      if (!radio("transaction")) {
-        add("Transaction", $(".choix", $('input[name="transaction"]').closest("fieldset")));
+      if (!typeTransSelect || !typeTransSelect.value) {
+        add("Type de transaction", typeTransSelect);
+      } else if (typeTransSelect.value === "__autre__" && !trim(inputTypeTransAutre)) {
+        add("Type de transaction (préciser)", inputTypeTransAutre);
+      }
+      if (isShown(wrapNatureTrans) && !radio("nature-transaction")) {
+        add("Opération liée (Activation ou Renouvellement)", $(".choix", wrapNatureTrans));
       }
       if (isShown(wrapTypeAct) && !radio("type-activation")) {
         add("Ouverture ou ajout de ligne", $(".choix", wrapTypeAct));
@@ -1279,6 +1543,13 @@
         if (!radio("entente")) {
           add("Entente", $(".choix", $('input[name="entente"]').closest("fieldset")));
         }
+        var titulaireEl = document.getElementById("nom-titulaire");
+        if (isShown(titulaireEl) && !trim(titulaireEl)) add("Nom du titulaire du compte", titulaireEl);
+        var courrielEl = document.getElementById("courriel-client");
+        var courrielVal = trim(courrielEl);
+        if (isShown(courrielEl) && (!courrielVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(courrielVal))) {
+          add("Courriel du client (eversign)", courrielEl);
+        }
         var compteEl = document.getElementById("numero-compte");
         if (isShown(compteEl) && !trim(compteEl)) add("# de compte", compteEl);
         var postalEl = document.getElementById("code-postal-compte");
@@ -1287,18 +1558,22 @@
           add("NEQ", document.getElementById("neq"));
         }
         if (isShown(wrapEvs) && !trim(document.getElementById("evs"))) {
-          add("Codes EVS", document.getElementById("evs"));
+          add("Code(s) EVS complet(s)", document.getElementById("evs"));
         }
 
         $$(".ligne", lignesEl).forEach(function (ligne, i) {
           if (!isShown(ligne)) return;
           var g = "Ligne " + (i + 1);
           var num = $(".f-numero", ligne);
-          if (isShown(num) && !trim(num)) add("Numéro (ou temporaire)", num, g);
-          var nom = $(".f-nom", ligne);
-          if (isShown(nom) && !trim(nom)) add("Nom de l'utilisateur", nom, g);
-          var forfait = $(".f-forfait", ligne);
-          if (isShown(forfait) && !trim(forfait)) add("Forfait choisi", forfait, g);
+          if (isShown(num) && !trim(num)) add("Numéro visé (ou temporaire)", num, g);
+
+          var forfaitSel = $(".f-forfait-select", ligne);
+          if (!forfaitSel || !forfaitSel.value) {
+            add("Forfait choisi", forfaitSel, g);
+          } else if (forfaitSel.value === "__autre__") {
+            var forfaitTxt = $(".f-forfait", ligne);
+            if (!trim(forfaitTxt)) add("Forfait choisi (préciser)", forfaitTxt, g);
+          }
 
           var appareils = $(".champs-appareil", ligne);
           if (appareils && isShown(appareils)) {
@@ -1318,6 +1593,9 @@
             }
             var coul = $(".f-couleur", ligne);
             if (coul && isShown(coul) && !trim(coul)) add("Couleur", coul, g);
+            var imei = $(".f-imei", ligne);
+            if (imei && isShown(imei) && !trim(imei)) add("IMEI 1 (sur la boîte)", imei, g);
+
             var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
             if (!optNouvel) {
               add("Option retour du nouvel appareil", $(".champs-appareil .choix", ligne) || $(".champs-appareil fieldset", ligne), g);
@@ -1354,7 +1632,7 @@
           if (blocRen && isShown(blocRen)) {
             var optRetour = $$(".opt-retour", ligne).filter(function (r) { return r.checked; })[0];
             if (!optRetour) {
-              add("Le client accepte de payer l'option retour?", $(".choix", blocRen), g);
+              add("Le client accepte de payer l'option retour (ancien appareil)?", $(".choix", blocRen), g);
             } else if (optRetour.value === "oui") {
               var payWrap = $(".champs-option-paiement", ligne);
               if (payWrap && isShown(payWrap)) {
@@ -1365,6 +1643,12 @@
                 var pay = $$(".opt-paiement", ligne).filter(function (r) { return r.checked; })[0];
                 if (!pay) add("En 1 coup / Financement 24 mois", $(".choix", payWrap), g);
               }
+            }
+
+            var wrapSoldes = $(".wrap-accepte-soldes", ligne);
+            if (wrapSoldes && isShown(wrapSoldes)) {
+              var acc = $$(".opt-accepte-soldes", ligne).filter(function (r) { return r.checked; })[0];
+              if (!acc) add("Le client accepte de payer ces soldes?", $(".choix", wrapSoldes), g);
             }
           }
 
@@ -1383,6 +1667,11 @@
             if (!offre) add("Le client a accepté l'offre?", $(".champs-rachat .choix", ligne), g);
           }
 
+          var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
+          if (!dcc) {
+            add("Protection DCC", $(".bloc-dcc .choix", ligne), g);
+          }
+
           var blocEnc = $(".bloc-encontinu", ligne);
           var chkEnc = $(".chk-encontinu", ligne);
           var champsEnc = $(".champs-encontinu", ligne);
@@ -1391,6 +1680,24 @@
             if (!enc) add("Choix EnContinu+", $(".choix", champsEnc), g);
           }
         });
+
+        var mensuelEl = document.getElementById("montant-mensuel-attendu");
+        if (isShown(mensuelEl) && !isFinite(parseMontant(mensuelEl.value))) {
+          add("Mensualité totale attendue (avant taxes) $", mensuelEl);
+        }
+        var magasinEl = document.getElementById("montant-magasin-attendu");
+        if (isShown(magasinEl) && !isFinite(parseMontant(magasinEl.value))) {
+          add("Montant à payer maintenant en magasin $", magasinEl);
+        }
+        if (!radio("frais-avpa")) {
+          add("Frais AVPA", $(".choix", $('input[name="frais-avpa"]').closest("fieldset")));
+        }
+        if (!radio("fonctions-perdues")) {
+          add("Fonctions perdues expliquées au client?", $(".choix", $('input[name="fonctions-perdues"]').closest("fieldset")));
+        }
+        if (!radio("mise-en-service")) {
+          add("Mise en service", $(".choix", $('input[name="mise-en-service"]').closest("fieldset")));
+        }
       }
 
       return items;
@@ -1473,6 +1780,9 @@
       if (ligne) {
         if (e.target.classList.contains("f-rachat-prix")) applyPrixDefaut(ligne, true);
         else if (e.target.classList.contains("f-option-montant")) applyPrixDefaut(ligne, false);
+        if (e.target.classList.contains("f-solde-appareil") || e.target.classList.contains("f-solde-pf")) {
+          syncSoldesActuels(ligne);
+        }
         updatePrixGrille(ligne);
       }
       updateMemo();
@@ -1482,12 +1792,22 @@
     form.addEventListener("blur", function (e) {
       var t = e.target;
       if (!t || !t.classList) return;
-      if (!t.classList.contains("f-option-montant") && !t.classList.contains("f-rachat-prix") && !t.classList.contains("f-rachat-option") && !t.classList.contains("f-option-retour-nouvel") && !t.classList.contains("f-financement-nouvel")) return;
+      var isMoney = t.classList.contains("f-option-montant") ||
+        t.classList.contains("f-rachat-prix") ||
+        t.classList.contains("f-rachat-option") ||
+        t.classList.contains("f-option-retour-nouvel") ||
+        t.classList.contains("f-financement-nouvel") ||
+        t.classList.contains("f-solde-appareil") ||
+        t.classList.contains("f-solde-pf") ||
+        t.id === "montant-mensuel-attendu" ||
+        t.id === "montant-magasin-attendu";
+      if (!isMoney) return;
       var n = parseMontant(t.value);
       if (isFinite(n)) t.value = formatArgent(n);
-      var ligne = t.closest(".ligne");
+      var ligne = t.closest && t.closest(".ligne");
       if (ligne) {
         applyPrixDefaut(ligne, t.classList.contains("f-rachat-prix"));
+        syncSoldesActuels(ligne);
         updatePrixGrille(ligne);
       }
       updateMemo();
@@ -1562,6 +1882,7 @@
       }
     });
 
+    remplirSelectTypesTransaction();
     addLine();
     updateVisibility();
   })();
