@@ -423,6 +423,48 @@
       background: var(--erreur-fond);
     }
 
+
+    .estimation-boite {
+      background: var(--actif-fond);
+      border: 2px solid var(--aubergine);
+      padding: 14px;
+    }
+    .estimation-grille {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px) {
+      .estimation-grille { grid-template-columns: 1fr; }
+    }
+    .estimation-carte {
+      background: var(--blanc);
+      border: 1px solid var(--bordure);
+      padding: 12px;
+    }
+    .estimation-libelle {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--aubergine);
+      margin: 0 0 4px;
+    }
+    .estimation-montant {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--aubergine);
+      margin: 0 0 6px;
+    }
+    .estimation-detail {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--texte-doux);
+      line-height: 1.35;
+    }
+    .f-ancien-total[readonly] {
+      background: var(--etiquette);
+      color: var(--aubergine);
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -461,23 +503,23 @@
           </fieldset>
 
           <div class="grille">
-            <label class="champ plein" for="type-transaction">Type de transaction
+            <label class="champ" for="type-transaction">Type de transaction
               <select id="type-transaction" name="type-transaction">
                 <option value="">Choisir un type de transaction</option>
+              </select>
+            </label>
+            <label class="champ" id="wrap-mode-achat" for="mode-achat">Mode d'achat de l'appareil
+              <select id="mode-achat" name="mode-achat">
+                <option value="">Choisir un mode d'achat</option>
               </select>
             </label>
             <label class="champ plein" id="wrap-type-transaction-autre" hidden for="type-transaction-autre">Préciser le type de transaction
               <input type="text" id="type-transaction-autre" name="type-transaction-autre" autocomplete="off">
             </label>
+            <label class="champ plein" id="wrap-mode-achat-autre" hidden for="mode-achat-autre">Préciser le mode d'achat de l'appareil
+              <input type="text" id="mode-achat-autre" name="mode-achat-autre" autocomplete="off">
+            </label>
           </div>
-
-          <fieldset id="wrap-nature-transaction" hidden style="margin-top: 16px;">
-            <legend>Opération liée</legend>
-            <div class="choix">
-              <label><input type="radio" name="nature-transaction" value="activation"> Activation</label>
-              <label><input type="radio" name="nature-transaction" value="renouvellement"> Renouvellement</label>
-            </div>
-          </fieldset>
 
           <fieldset id="wrap-type-activation" hidden style="margin-top: 16px;">
             <legend class="visually-hidden">Ouverture ou ajout de ligne</legend>
@@ -539,24 +581,15 @@
           </div>
         </section>
 
-        <section class="bloc" id="bloc-montants-confirmations">
-          <div class="bloc-titre">Montants attendus, frais AVPA et confirmations</div>
+        <section class="bloc" id="bloc-frais-confirmations">
+          <div class="bloc-titre">Frais AVPA et confirmations du rep</div>
           <div class="bloc-corps">
-            <div class="grille" style="margin-bottom: 16px;">
-              <label class="champ" for="montant-mensuel-attendu">Mensualité totale attendue (avant taxes) $
-                <input type="text" id="montant-mensuel-attendu" name="montant-mensuel-attendu" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
-              </label>
-              <label class="champ" for="montant-magasin-attendu">Montant à payer maintenant en magasin $
-                <input type="text" id="montant-magasin-attendu" name="montant-magasin-attendu" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
-              </label>
-            </div>
-
             <fieldset>
-              <legend>Frais AVPA</legend>
+              <legend>Frais AVPA (taxables)</legend>
               <div class="choix choix-3">
-                <label><input type="radio" name="frais-avpa" value="Logistique de base 39,50 $"> Logistique de base 39,50 $</label>
-                <label><input type="radio" name="frais-avpa" value="Complet 69,50 $"> Complet 69,50 $</label>
-                <label><input type="radio" name="frais-avpa" value="Total 94,50 $"> Total 94,50 $</label>
+                <label><input type="radio" name="frais-avpa" value="Logistique de base 39,50 $" data-montant="39.50"> Logistique de base 39,50 $</label>
+                <label><input type="radio" name="frais-avpa" value="Complet 69,50 $" data-montant="69.50"> Complet 69,50 $</label>
+                <label><input type="radio" name="frais-avpa" value="Total 94,50 $" data-montant="94.50"> Total 94,50 $</label>
               </div>
             </fieldset>
 
@@ -575,6 +608,27 @@
                 <label><input type="radio" name="mise-en-service" value="plus-tard"> Plus tard</label>
               </div>
             </fieldset>
+          </div>
+        </section>
+
+        <section class="bloc" id="bloc-estimation">
+          <div class="bloc-titre">Estimation pour vérification (calculée automatiquement)</div>
+          <div class="bloc-corps">
+            <div class="estimation-boite">
+              <div class="estimation-grille">
+                <div class="estimation-carte">
+                  <p class="estimation-libelle">Mensualité estimée (avant taxes)</p>
+                  <p class="estimation-montant" id="est-mensuel">0,00 $ / mois</p>
+                  <p class="estimation-detail" id="est-mensuel-detail">Forfait net + financement mensuel + DCC</p>
+                </div>
+                <div class="estimation-carte">
+                  <p class="estimation-libelle">Montant estimé à payer en magasin</p>
+                  <p class="estimation-montant" id="est-magasin">0,00 $</p>
+                  <p class="estimation-detail" id="est-magasin-detail">Taxes Option retour + taxes financement 24 mois + frais AVPA (avec taxes) + ancien appareil</p>
+                </div>
+              </div>
+              <p class="aide" style="margin-top: 10px;">Estimation automatique pour vérification (TPS 5 % + TVQ 9,975 % = 14,975 %). Toujours valider les montants exacts au portail avant soumission.</p>
+            </div>
           </div>
         </section>
       </div>
@@ -607,12 +661,16 @@
           <label class="champ">Nom de l'utilisateur (si différent)
             <input type="text" class="f-nom" autocomplete="off" placeholder="Optionnel si titulaire">
           </label>
-          <label class="champ plein">Forfait choisi
+          <label class="champ">Forfait choisi
             <select class="f-forfait-select">
               <option value="">Choisir un forfait</option>
             </select>
           </label>
-          <label class="champ plein champ-forfait-autre" hidden>Autre forfait (nom et prix mensuel)
+          <label class="champ">Prix du forfait (avant taxes, ex. 75-10) $
+            <input type="text" class="f-forfait-prix" inputmode="text" autocomplete="off" spellcheck="false" placeholder="ex. 60 ou 75-10">
+            <span class="aide note-forfait-net" hidden></span>
+          </label>
+          <label class="champ plein champ-forfait-autre" hidden>Autre forfait (nom du forfait)
             <input type="text" class="f-forfait" autocomplete="off">
           </label>
         </div>
@@ -637,7 +695,8 @@
           <label class="champ champ-couleur">Couleur
             <input type="text" class="f-couleur" autocomplete="off">
           </label>
-          <label class="champ plein champ-imei">IMEI 1 (sur la boîte)
+          <label class="case plein"><input type="checkbox" class="chk-appareil-commande"> Appareil en commande (IMEI à venir)</label>
+          <label class="champ plein champ-imei">IMEI 1 (sur la boîte — optionnel si pas encore en main)
             <input type="text" class="f-imei" inputmode="numeric" maxlength="20" autocomplete="off" spellcheck="false" placeholder="15 chiffres exacts (IMEI 1)">
           </label>
           <fieldset class="plein">
@@ -647,12 +706,15 @@
               <label><input type="radio" class="opt-retour-nouvel" value="sans"> Sans Option retour</label>
             </div>
           </fieldset>
-          <div class="sous-champs champs-option-retour-nouvel plein" hidden>
-            <label class="champ">Montant de l'Option retour du nouvel appareil $
-              <input type="text" class="f-option-retour-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false">
+          <div class="sous-champs champs-financement-nouvel plein">
+            <label class="champ plein champ-option-retour-nouvel" hidden>Montant de l'Option retour du nouvel appareil $
+              <input type="text" class="f-option-retour-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
             </label>
-            <label class="champ">Montant financement mensuel $
-              <input type="text" class="f-financement-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false">
+            <label class="champ">Montant total financé (24 mois) $
+              <input type="text" class="f-total-finance-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
+            </label>
+            <label class="champ">Financement mensuel / Paiements faciles $
+              <input type="text" class="f-financement-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
             </label>
           </div>
         </div>
@@ -671,36 +733,35 @@
         </div>
 
         <div class="pile bloc-renouvellement" hidden>
-          <fieldset>
-            <legend>Option retour de l'ancien appareil — le client accepte de la payer?</legend>
-            <div class="choix">
-              <label><input type="radio" class="opt-retour" value="oui"> Oui</label>
-              <label><input type="radio" class="opt-retour" value="non"> Non</label>
-            </div>
-          </fieldset>
-          <div class="pile champs-option-paiement" hidden>
-            <label class="champ">Montant de l'option retour (taxes incluses) $
-              <input type="number" class="f-option-montant" step="0.01" min="0" inputmode="decimal" autocomplete="off">
+          <div class="sous-champs bloc-ancien-appareil">
+            <p class="libelle plein" style="margin: 0;">Montants à payer sur l'ancien appareil</p>
+            <label class="champ">Option retour (ancien appareil, taxes incl.) $
+              <input type="text" class="f-option-montant" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
             </label>
-            <div class="choix">
-              <label><input type="radio" class="opt-paiement" value="1-coup"> En 1 coup</label>
-              <label><input type="radio" class="opt-paiement" value="24-mois"> Financement 24 mois</label>
-            </div>
-          </div>
-
-          <div class="sous-champs bloc-soldes-actuel">
             <label class="champ">Solde d'appareil actuel $
               <input type="text" class="f-solde-appareil" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
             </label>
-            <label class="champ">Solde Paiements faciles $
+            <label class="champ">Solde Paiements faciles actuel $
               <input type="text" class="f-solde-pf" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
             </label>
-            <span class="aide plein" style="margin-top: 0;">Laisser vide ou à 0 s'il n'y a aucun solde sur l'appareil actuel.</span>
-            <fieldset class="plein wrap-accepte-soldes" hidden>
-              <legend>Le client accepte de payer ces soldes?</legend>
+            <label class="champ">Total sur l'ancien appareil $
+              <input type="text" class="f-ancien-total" readonly tabindex="-1" value="0,00">
+            </label>
+            <span class="aide plein" style="margin-top: 0;">Laisser vide ou à 0 s'il n'y a aucun montant à payer sur l'ancien appareil.</span>
+            <div class="pile plein wrap-option-paiement-ancien" hidden>
+              <fieldset>
+                <legend>Paiement de l'option retour (ancien appareil)</legend>
+                <div class="choix">
+                  <label><input type="radio" class="opt-paiement" value="1-coup"> En 1 coup</label>
+                  <label><input type="radio" class="opt-paiement" value="24-mois"> Financement 24 mois</label>
+                </div>
+              </fieldset>
+            </div>
+            <fieldset class="plein wrap-accepte-ancien" hidden>
+              <legend class="legend-accepte-ancien">Le client accepte de payer ces montants (total 0,00 $)?</legend>
               <div class="choix">
-                <label><input type="radio" class="opt-accepte-soldes" value="oui"> Oui</label>
-                <label><input type="radio" class="opt-accepte-soldes" value="non"> Non</label>
+                <label><input type="radio" class="opt-accepte-ancien" value="oui"> Oui</label>
+                <label><input type="radio" class="opt-accepte-ancien" value="non"> Non</label>
               </div>
             </fieldset>
           </div>
@@ -749,6 +810,9 @@
               <label><input type="radio" class="opt-dcc" value="Enlever"> Enlever</label>
               <label><input type="radio" class="opt-dcc" value="Aucune"> Aucune</label>
             </div>
+            <label class="champ wrap-dcc-montant" hidden style="margin-top: 10px;">Montant mensuel DCC $
+              <input type="text" class="f-dcc-montant" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="ex. 17,00">
+            </label>
           </fieldset>
 
           <div class="pile bloc-encontinu" hidden>
@@ -772,21 +836,32 @@
     "use strict";
 
     // =========================================================================
-    // CONFIGURATION FACILE À METTRE À JOUR (types de transaction et forfaits)
+    // CONFIGURATION FACILE À METTRE À JOUR
     // Ajouter simplement une nouvelle entrée dans le tableau correspondant
     // au fil des transactions pour l'afficher dans la liste déroulante.
     // =========================================================================
     var TYPES_TRANSACTION = [
       "Activation",
       "Renouvellement",
+      "Ajout de ligne"
+    ];
+
+    var MODES_ACHAT = [
       "Achat complet",
       "Aucun acompte complet",
       "Aucun acompte standard"
     ];
 
+    // Chaque forfait peut être un objet { nom: "...", prix: "60" } ou une simple chaîne.
     var FORFAITS_CONNUS = [
-      "Forfait 60 $"
+      { nom: "Forfait 60 $", prix: "60" }
     ];
+
+    // Taxes du Québec : TPS 5 % + TVQ 9,975 % = 14,975 %
+    var TPS_QC = 0.05;
+    var TVQ_QC = 0.09975;
+    var TAUX_TAXES_QC = TPS_QC + TVQ_QC;
+    var TAXE_QC = 1 + TAUX_TAXES_QC;
 
     var APPAREILS_GROUPES = [{"marque":"Apple","modeles":[{"nom":"iPhone 18 Pro","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone 18 Pro Max","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone Duo","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone 17e","caps":["256 Go","512 Go"]},{"nom":"iPhone 17","caps":["256 Go","512 Go"]},{"nom":"iPhone 17 Pro","caps":["256 Go","512 Go","1 To"]},{"nom":"iPhone 17 Pro Max","caps":["256 Go","512 Go","1 To","2 To"]},{"nom":"iPhone Air","caps":["256 Go","512 Go","1 To"]},{"nom":"iPhone 16E","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 16","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 16 Plus","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 16 Pro","caps":["128 Go","256 Go","512 Go","1 To"]},{"nom":"iPhone 16 Pro Max","caps":["256 Go","512 Go","1 To"]},{"nom":"iPhone 15","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 15 Plus","caps":["128 Go","256 Go","512 Go"]},{"nom":"iPhone 15 Pro","caps":["128 Go","256 Go","512 Go","1 To"]},{"nom":"iPhone 15 Pro Max","caps":["256 Go","512 Go","1 To"]}]},{"marque":"Samsung","modeles":[{"nom":"Galaxy A03s","caps":["32 Go"]},{"nom":"Galaxy A17 5G","caps":[]},{"nom":"Galaxy A16 5G","caps":[]},{"nom":"Galaxy A15 5G","caps":[]},{"nom":"Galaxy A14 5G","caps":["64 Go"]},{"nom":"Galaxy A36 5G","caps":[]},{"nom":"Galaxy A35 5G","caps":[]},{"nom":"Galaxy A57 5G","caps":["128 Go"]},{"nom":"Galaxy A56 5G","caps":["128 Go"]},{"nom":"Galaxy A54 5G","caps":["128 Go"]},{"nom":"Galaxy XCover6 Pro","caps":[]},{"nom":"Galaxy S26FE","caps":["128 Go"]},{"nom":"Galaxy S25FE","caps":["128 Go","256 Go"]},{"nom":"Galaxy S24FE 5G","caps":["128 Go","256 Go"]},{"nom":"Galaxy S26","caps":["256 Go","512 Go"]},{"nom":"Galaxy S26 Plus","caps":["256 Go","512 Go"]},{"nom":"Galaxy S26 Ultra","caps":["256 Go","512 Go","1 To"]},{"nom":"Galaxy S25 Edge","caps":["256 Go"]},{"nom":"Galaxy S25","caps":["128 Go","256 Go"]},{"nom":"Galaxy S25+","caps":["256 Go","512 Go"]},{"nom":"Galaxy S25 Ultra","caps":["256 Go","512 Go"]},{"nom":"Galaxy S24","caps":["128 Go","256 Go"]},{"nom":"Galaxy S24+","caps":["256 Go","512 Go"]},{"nom":"Galaxy S24 Ultra","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold8","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Flip8","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Flip7","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold8 Ultra","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold7","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Flip6","caps":["256 Go","512 Go"]},{"nom":"Galaxy Z Fold6","caps":["256 Go","512 Go"]},{"nom":"XCover 7 Pro","caps":[]}]},{"marque":"Google","modeles":[{"nom":"Pixel 11","caps":["256 Go","512 Go"]},{"nom":"Pixel 11 Pro","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 11 Pro XL","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 11 Pro Fold","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 10a","caps":["128 Go"]},{"nom":"Pixel 10","caps":["128 Go","256 Go"]},{"nom":"Pixel 10 Pro","caps":["128 Go","256 Go","512 Go","1 To"]},{"nom":"Pixel 10 Pro XL","caps":["256 Go","512 Go","1 To"]},{"nom":"Pixel 10 Pro Fold","caps":["256 Go","512 Go"]},{"nom":"Pixel 9a","caps":["128 Go"]},{"nom":"Pixel 9","caps":["128 Go","256 Go"]},{"nom":"Pixel 9 Pro","caps":["128 Go","256 Go"]},{"nom":"Pixel 9 Pro XL","caps":["128 Go","256 Go","512 Go"]},{"nom":"Pixel Pro Fold","caps":["256 Go","512 Go"]},{"nom":"Pixel 8","caps":["128 Go","256 Go"]}]},{"marque":"Motorola","modeles":[{"nom":"Razr 2025","caps":[]},{"nom":"Moto Razr+ (2024)","caps":[]},{"nom":"Razr+","caps":[]},{"nom":"Moto Edge 2026","caps":[]},{"nom":"Moto Edge 2025","caps":[]},{"nom":"Moto Edge 2024","caps":[]},{"nom":"Moto G 2026","caps":[]},{"nom":"Moto G 2025","caps":[]},{"nom":"Moto G 5G (2024)","caps":[]}]},{"marque":"Autres","modeles":[{"nom":"TCL K70 NXTPAPER","caps":[]},{"nom":"TCL Go Flip 6","caps":["8 Go"]},{"nom":"Sonim XP3plus 5G","caps":[]},{"nom":"Sonim XP Pro","caps":["256 Go"]},{"nom":"Sonim XP3plus","caps":["10 Go"]},{"nom":"Sonim XP5plus","caps":[]},{"nom":"Sonim XP10","caps":[]},{"nom":"Nubia Cymbal 2","caps":[]},{"nom":"ZTE Nubia A76","caps":[]},{"nom":"ZTE Nubia Flip 2","caps":[]},{"nom":"ZTE Cymbal 2","caps":[]},{"nom":"ZTE Blade A7P","caps":[]},{"nom":"ZTE Nubia A75","caps":[]}]}];
     var APPAREILS_CAPS = {};
@@ -802,12 +877,19 @@
     var typeTransSelect = document.getElementById("type-transaction");
     var wrapTypeTransAutre = document.getElementById("wrap-type-transaction-autre");
     var inputTypeTransAutre = document.getElementById("type-transaction-autre");
-    var wrapNatureTrans = document.getElementById("wrap-nature-transaction");
+    var modeAchatSelect = document.getElementById("mode-achat");
+    var wrapModeAchat = document.getElementById("wrap-mode-achat");
+    var wrapModeAchatAutre = document.getElementById("wrap-mode-achat-autre");
+    var inputModeAchatAutre = document.getElementById("mode-achat-autre");
     var wrapTypeAct = document.getElementById("wrap-type-activation");
     var choixAvpa = document.getElementById("choix-avpa");
     var aideCompte = document.getElementById("aide-compte");
     var wrapNeq = document.getElementById("wrap-neq");
     var wrapEvs = document.getElementById("wrap-evs");
+    var estMensuelEl = document.getElementById("est-mensuel");
+    var estMensuelDetailEl = document.getElementById("est-mensuel-detail");
+    var estMagasinEl = document.getElementById("est-magasin");
+    var estMagasinDetailEl = document.getElementById("est-magasin-detail");
     var btnAjouter = document.getElementById("btn-ajouter");
     var btnCopier = document.getElementById("btn-copier");
     var btnEffacer = document.getElementById("btn-effacer");
@@ -836,6 +918,9 @@
     function trim(el) {
       return el && el.value ? String(el.value).trim() : "";
     }
+    function round2(n) {
+      return Math.round(n * 100) / 100;
+    }
 
     function remplirSelectTypesTransaction() {
       if (!typeTransSelect) return;
@@ -856,6 +941,25 @@
       typeTransSelect.appendChild(autre);
     }
 
+    function remplirSelectModesAchat() {
+      if (!modeAchatSelect) return;
+      modeAchatSelect.innerHTML = "";
+      var ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = "Choisir un mode d'achat";
+      modeAchatSelect.appendChild(ph);
+      MODES_ACHAT.forEach(function (m) {
+        var opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        modeAchatSelect.appendChild(opt);
+      });
+      var autre = document.createElement("option");
+      autre.value = "__autre__";
+      autre.textContent = "Autre (préciser)";
+      modeAchatSelect.appendChild(autre);
+    }
+
     function remplirSelectForfaits(sel) {
       if (!sel) return;
       sel.innerHTML = "";
@@ -863,10 +967,13 @@
       ph.value = "";
       ph.textContent = "Choisir un forfait";
       sel.appendChild(ph);
-      FORFAITS_CONNUS.forEach(function (f) {
+      FORFAITS_CONNUS.forEach(function (item) {
+        var nom = typeof item === "string" ? item : item.nom;
+        var prix = typeof item === "object" && item && item.prix != null ? String(item.prix) : "";
         var opt = document.createElement("option");
-        opt.value = f;
-        opt.textContent = f;
+        opt.value = nom;
+        opt.textContent = nom;
+        if (prix) opt.setAttribute("data-prix", prix);
         sel.appendChild(opt);
       });
       var autre = document.createElement("option");
@@ -881,18 +988,58 @@
       return typeTransSelect.value || "";
     }
 
+    function valeurModeAchat() {
+      if (!modeAchatSelect) return "";
+      if (modeAchatSelect.value === "__autre__") return trim(inputModeAchatAutre);
+      return modeAchatSelect.value || "";
+    }
+
     function effectiveNature() {
       if (!typeTransSelect || !typeTransSelect.value) return "";
-      if (typeTransSelect.value === "Activation") return "activation";
+      if (typeTransSelect.value === "Activation" || typeTransSelect.value === "Ajout de ligne") return "activation";
       if (typeTransSelect.value === "Renouvellement") return "renouvellement";
-      return radio("nature-transaction");
+      return "";
+    }
+
+    function parsePrixForfait(str) {
+      if (str == null) return null;
+      var s = String(str).trim().replace(/\$/g, "").replace(/,/g, ".").replace(/\s+/g, "");
+      if (!s) return null;
+      var m = s.match(/^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/);
+      if (m) {
+        var liste = Number(m[1]);
+        var rabais = Number(m[2]);
+        if (!isFinite(liste) || !isFinite(rabais)) return null;
+        var net = round2(Math.max(0, liste - rabais));
+        return { net: net, liste: round2(liste), rabais: round2(rabais), hasDiscount: true };
+      }
+      var n = Number(s);
+      if (!isFinite(n) || n < 0) return null;
+      return { net: round2(n), liste: round2(n), rabais: 0, hasDiscount: false };
     }
 
     function syncForfaitChamps(ligne) {
       var sel = $(".f-forfait-select", ligne);
       var wrapAutre = $(".champ-forfait-autre", ligne);
-      if (!sel || !wrapAutre) return;
-      wrapAutre.hidden = sel.value !== "__autre__";
+      if (sel && wrapAutre) {
+        wrapAutre.hidden = sel.value !== "__autre__";
+      }
+      var noteNet = $(".note-forfait-net", ligne);
+      var prixEl = $(".f-forfait-prix", ligne);
+      var info = parsePrixForfait(prixEl ? prixEl.value : "");
+      if (noteNet) {
+        if (info) {
+          if (info.hasDiscount) {
+            noteNet.textContent = "Prix net : " + formatArgentFr(info.net) + " $ / mois (" + formatArgentFr(info.liste) + " $ − " + formatArgentFr(info.rabais) + " $ rabais préautorisé)";
+          } else {
+            noteNet.textContent = "Prix net : " + formatArgentFr(info.net) + " $ / mois";
+          }
+          noteNet.hidden = false;
+        } else {
+          noteNet.textContent = "";
+          noteNet.hidden = true;
+        }
+      }
     }
 
     function valeurForfait(ligne) {
@@ -906,10 +1053,9 @@
       lineSeq += 1;
       var node = tpl.content.firstElementChild.cloneNode(true);
       node.setAttribute("data-id", String(lineSeq));
-      $$(".opt-retour", node).forEach(function (r) { r.name = "option-retour-" + lineSeq; });
       $$(".opt-retour-nouvel", node).forEach(function (r) { r.name = "option-retour-nouvel-" + lineSeq; });
       $$(".opt-paiement", node).forEach(function (r) { r.name = "option-paiement-" + lineSeq; });
-      $$(".opt-accepte-soldes", node).forEach(function (r) { r.name = "accepte-soldes-" + lineSeq; });
+      $$(".opt-accepte-ancien", node).forEach(function (r) { r.name = "accepte-ancien-" + lineSeq; });
       $$(".opt-offre", node).forEach(function (r) { r.name = "offre-acceptee-" + lineSeq; });
       $$(".opt-dcc", node).forEach(function (r) { r.name = "dcc-" + lineSeq; });
       $$(".opt-encontinu", node).forEach(function (r) { r.name = "encontinu-" + lineSeq; });
@@ -1034,10 +1180,13 @@
         else coulWrap.classList.add("plein");
       }
 
+      var enCommande = $(".chk-appareil-commande", ligne);
+      var imeiWrap = $(".champ-imei", ligne);
+      if (imeiWrap) imeiWrap.hidden = !!(enCommande && enCommande.checked);
+
       ligne.dataset.modelePrec = val;
     }
 
-    var TAXE_QC = 1.14975;
     var GRILLE_VALIDITE = "du 1er novembre au 31 décembre 2026";
     var GRILLE_REPRISES = [{"categorie":"iPhone","modele":"iPhone SE 2022","beau":30,"defectueux":null,"brise":null},{"categorie":"iPhone","modele":"iPhone 11*","beau":50,"defectueux":30,"brise":null},{"categorie":"iPhone","modele":"iPhone 11 Pro*","beau":60,"defectueux":40,"brise":null},{"categorie":"iPhone","modele":"iPhone 11 Pro Max*","beau":85,"defectueux":65,"brise":null},{"categorie":"iPhone","modele":"iPhone 12*","beau":80,"defectueux":10,"brise":null},{"categorie":"iPhone","modele":"iPhone 12 Pro","beau":180,"defectueux":80,"brise":55},{"categorie":"iPhone","modele":"iPhone 12 Pro Max*","beau":210,"defectueux":110,"brise":56},{"categorie":"iPhone","modele":"iPhone 13 mini*","beau":130,"defectueux":30,"brise":null},{"categorie":"iPhone","modele":"iPhone 13*","beau":155,"defectueux":80,"brise":17},{"categorie":"iPhone","modele":"iPhone 13 Pro","beau":185,"defectueux":85,"brise":40},{"categorie":"iPhone","modele":"iPhone 13 Pro Max*","beau":200,"defectueux":100,"brise":26},{"categorie":"iPhone","modele":"iPhone 14*","beau":175,"defectueux":75,"brise":17},{"categorie":"iPhone","modele":"iPhone 14+","beau":220,"defectueux":120,"brise":86},{"categorie":"iPhone","modele":"iPhone 14 Pro","beau":290,"defectueux":190,"brise":130},{"categorie":"iPhone","modele":"iPhone 14 Pro Max*","beau":375,"defectueux":275,"brise":232},{"categorie":"iPhone","modele":"iPhone 15*","beau":315,"defectueux":165,"brise":95},{"categorie":"iPhone","modele":"iPhone 15+","beau":300,"defectueux":170,"brise":83},{"categorie":"iPhone","modele":"iPhone 15 Pro","beau":510,"defectueux":370,"brise":300},{"categorie":"iPhone","modele":"iPhone 15 Pro Max*","beau":580,"defectueux":430,"brise":361},{"categorie":"iPhone","modele":"iPhone 16e","beau":250,"defectueux":150,"brise":79},{"categorie":"iPhone","modele":"iPhone 16*","beau":455,"defectueux":325,"brise":254},{"categorie":"iPhone","modele":"iPhone 16+","beau":480,"defectueux":350,"brise":268},{"categorie":"iPhone","modele":"iPhone 16 Pro","beau":565,"defectueux":400,"brise":293},{"categorie":"iPhone","modele":"iPhone 16 Pro Max*","beau":675,"defectueux":500,"brise":348},{"categorie":"iPhone","modele":"iPhone 17e","beau":480,"defectueux":355,"brise":250},{"categorie":"iPhone","modele":"iPhone 17","beau":600,"defectueux":475,"brise":54},{"categorie":"iPhone","modele":"iPhone 17 Pro","beau":850,"defectueux":725,"brise":260},{"categorie":"iPhone","modele":"iPhone 17 Pro Max","beau":950,"defectueux":825,"brise":307},{"categorie":"Samsung Galaxy A","modele":"A13","beau":40,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A14","beau":55,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A15","beau":60,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A16","beau":110,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A21/32","beau":30,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A70/A71","beau":20,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A51","beau":20,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A52/A53","beau":55,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy A","modele":"A54","beau":80,"defectueux":30,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S20FE","beau":30,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S20/S20+","beau":30,"defectueux":10,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S20 Ultra","beau":50,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S21/S21+","beau":30,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S21 Ultra","beau":90,"defectueux":40,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S21 FE","beau":80,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S22","beau":100,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S22+","beau":105,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S22 Ultra","beau":245,"defectueux":145,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23","beau":160,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23+","beau":175,"defectueux":75,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23 Ultra","beau":310,"defectueux":210,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S23 FE","beau":160,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S24 FE","beau":190,"defectueux":90,"brise":20},{"categorie":"Samsung Galaxy S","modele":"S24","beau":220,"defectueux":120,"brise":null},{"categorie":"Samsung Galaxy S","modele":"S24+","beau":320,"defectueux":220,"brise":20},{"categorie":"Samsung Galaxy S","modele":"S24 Ultra","beau":410,"defectueux":310,"brise":20},{"categorie":"Samsung Galaxy S","modele":"S25","beau":350,"defectueux":250,"brise":89},{"categorie":"Samsung Galaxy S","modele":"S25+","beau":360,"defectueux":260,"brise":65},{"categorie":"Samsung Galaxy S","modele":"S25 Ultra","beau":605,"defectueux":505,"brise":218},{"categorie":"Samsung Galaxy Note et Z","modele":"Note 20","beau":25,"defectueux":5,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Note 20 Ultra","beau":50,"defectueux":30,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 3","beau":5,"defectueux":null,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 4","beau":75,"defectueux":5,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 5","beau":210,"defectueux":110,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Flip 6","beau":210,"defectueux":60,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 3","beau":175,"defectueux":75,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 4","beau":150,"defectueux":50,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 5","beau":275,"defectueux":175,"brise":null},{"categorie":"Samsung Galaxy Note et Z","modele":"Z Fold 6","beau":275,"defectueux":175,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 5","beau":20,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 6","beau":50,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 6 Pro","beau":20,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 6a","beau":40,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 7","beau":80,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 7 Pro","beau":100,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 7A","beau":20,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 8","beau":110,"defectueux":null,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 8 Pro","beau":180,"defectueux":80,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 8a","beau":110,"defectueux":60,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 9","beau":175,"defectueux":75,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 9 Pro","beau":320,"defectueux":220,"brise":20},{"categorie":"Google Pixel","modele":"Pixel 9 Pro Fold","beau":550,"defectueux":450,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 9 Pro XL","beau":325,"defectueux":225,"brise":null},{"categorie":"Google Pixel","modele":"Pixel 10","beau":370,"defectueux":270,"brise":106},{"categorie":"Google Pixel","modele":"Pixel 10 Pro","beau":520,"defectueux":420,"brise":92},{"categorie":"Google Pixel","modele":"Pixel 10 Pro XL","beau":665,"defectueux":565,"brise":244}];
     var ETAT_LIBELLES = { beau: "Beau", defectueux: "Défectueux", brise: "Brisé" };
@@ -1051,32 +1200,187 @@
     }
 
     function formatArgent(n) {
-      return (Math.round(n * 100) / 100).toFixed(2);
+      return round2(n).toFixed(2);
     }
 
     function formatArgentFr(n) {
       return formatArgent(n).replace(".", ",");
     }
 
-    function aSoldeActuelPositif(ligne) {
+    function montantsAncienAppareil(ligne) {
+      var opt = parseMontant(($(".f-option-montant", ligne) || {}).value);
       var sa = parseMontant(($(".f-solde-appareil", ligne) || {}).value);
       var sp = parseMontant(($(".f-solde-pf", ligne) || {}).value);
-      return (isFinite(sa) && sa > 0) || (isFinite(sp) && sp > 0);
+      var optVal = (isFinite(opt) && opt > 0) ? round2(opt) : 0;
+      var saVal = (isFinite(sa) && sa > 0) ? round2(sa) : 0;
+      var spVal = (isFinite(sp) && sp > 0) ? round2(sp) : 0;
+      var total = round2(optVal + saVal + spVal);
+      return { opt: optVal, sa: saVal, sp: spVal, total: total };
     }
 
-    function syncSoldesActuels(ligne) {
-      var wrap = $(".wrap-accepte-soldes", ligne);
-      if (!wrap) return;
-      var show = effectiveNature() === "renouvellement" && aSoldeActuelPositif(ligne);
-      wrap.hidden = !show;
+    function syncAncienAppareil(ligne) {
+      var m = montantsAncienAppareil(ligne);
+      var totalEl = $(".f-ancien-total", ligne);
+      if (totalEl) totalEl.value = formatArgentFr(m.total);
+
+      var wrapAccepte = $(".wrap-accepte-ancien", ligne);
+      var legendAccepte = $(".legend-accepte-ancien", ligne);
+      var show = effectiveNature() === "renouvellement" && m.total > 0;
+      if (wrapAccepte) wrapAccepte.hidden = !show;
+      if (legendAccepte) {
+        legendAccepte.textContent = "Le client accepte de payer ces montants (total " + formatArgentFr(m.total) + " $)?";
+      }
       if (!show) {
-        $$(".opt-accepte-soldes", ligne).forEach(function (r) { r.checked = false; });
+        $$(".opt-accepte-ancien", ligne).forEach(function (r) { r.checked = false; });
+      }
+
+      var acc = $$(".opt-accepte-ancien", ligne).filter(function (r) { return r.checked; })[0];
+      var wrapPayOpt = $(".wrap-option-paiement-ancien", ligne);
+      var showPay = effectiveNature() === "renouvellement" && m.opt > 0 && (!acc || acc.value === "oui");
+      if (wrapPayOpt) wrapPayOpt.hidden = !showPay;
+      if (!showPay) {
+        $$(".opt-paiement", ligne).forEach(function (r) { r.checked = false; });
+      }
+    }
+
+    function syncDccChamps(ligne) {
+      var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
+      var wrap = $(".wrap-dcc-montant", ligne);
+      var show = !!(dcc && (dcc.value === "Garder" || dcc.value === "Ajouter"));
+      if (wrap) wrap.hidden = !show;
+      if (!show) {
+        var inp = $(".f-dcc-montant", ligne);
+        if (inp) inp.value = "";
+      }
+    }
+
+    function syncFinancementNouvel(ligne, source) {
+      var totalEl = $(".f-total-finance-nouvel", ligne);
+      var mensEl = $(".f-financement-nouvel", ligne);
+      if (!totalEl || !mensEl) return;
+      if (source === "total") {
+        var t = parseMontant(totalEl.value);
+        if (isFinite(t) && t >= 0) {
+          ligne.dataset.finMode = "total";
+          mensEl.value = formatArgent(t / 24);
+        } else if (!trim(totalEl)) {
+          if (ligne.dataset.finMode === "total") mensEl.value = "";
+          ligne.dataset.finMode = "";
+        }
+      } else if (source === "mensuel") {
+        var m = parseMontant(mensEl.value);
+        if (isFinite(m) && m >= 0) {
+          ligne.dataset.finMode = "mensuel";
+          totalEl.value = formatArgent(m * 24);
+        } else if (!trim(mensEl)) {
+          if (ligne.dataset.finMode === "mensuel") totalEl.value = "";
+          ligne.dataset.finMode = "";
+        }
+      }
+    }
+
+    function calculerEstimation() {
+      var isAvpa = radio("entente") === "avpa-byod";
+      var nature = effectiveNature();
+      var totalForfait = 0;
+      var totalFinMensuel = 0;
+      var totalDcc = 0;
+
+      var totalTaxesOptRetour = 0;
+      var totalTaxesFinancement = 0;
+      var totalAncienAccepte = 0;
+
+      $$(".ligne", lignesEl).forEach(function (ligne) {
+        if (!isShown(ligne)) return;
+
+        var pf = parsePrixForfait(($(".f-forfait-prix", ligne) || {}).value);
+        if (pf) totalForfait = round2(totalForfait + pf.net);
+
+        if (!isAvpa) {
+          var finMens = parseMontant(($(".f-financement-nouvel", ligne) || {}).value);
+          var totalFin = parseMontant(($(".f-total-finance-nouvel", ligne) || {}).value);
+          if (isFinite(finMens) && finMens > 0) {
+            totalFinMensuel = round2(totalFinMensuel + finMens);
+          } else if (isFinite(totalFin) && totalFin > 0) {
+            totalFinMensuel = round2(totalFinMensuel + round2(totalFin / 24));
+          }
+
+          if (isFinite(totalFin) && totalFin > 0) {
+            totalTaxesFinancement = round2(totalTaxesFinancement + round2(totalFin * TAUX_TAXES_QC));
+          } else if (isFinite(finMens) && finMens > 0) {
+            totalTaxesFinancement = round2(totalTaxesFinancement + round2(finMens * 24 * TAUX_TAXES_QC));
+          }
+
+          var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
+          if (optNouvel && optNouvel.value === "avec") {
+            var montOpt = parseMontant(($(".f-option-retour-nouvel", ligne) || {}).value);
+            if (isFinite(montOpt) && montOpt > 0) {
+              totalTaxesOptRetour = round2(totalTaxesOptRetour + round2(montOpt * TAUX_TAXES_QC));
+            }
+          }
+        }
+
+        var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
+        if (dcc && (dcc.value === "Garder" || dcc.value === "Ajouter")) {
+          var dccM = parseMontant(($(".f-dcc-montant", ligne) || {}).value);
+          if (isFinite(dccM) && dccM > 0) totalDcc = round2(totalDcc + dccM);
+        }
+
+        if (nature === "renouvellement") {
+          var anc = montantsAncienAppareil(ligne);
+          var acc = $$(".opt-accepte-ancien", ligne).filter(function (r) { return r.checked; })[0];
+          if (anc.total > 0 && acc && acc.value === "oui") {
+            totalAncienAccepte = round2(totalAncienAccepte + anc.total);
+          }
+        }
+      });
+
+      var avpaRadio = document.querySelector('input[name="frais-avpa"]:checked');
+      var avpaHt = avpaRadio ? parseMontant(avpaRadio.getAttribute("data-montant")) : 0;
+      if (!isFinite(avpaHt) || avpaHt < 0) avpaHt = 0;
+      var avpaTtc = avpaHt > 0 ? round2(avpaHt * TAXE_QC) : 0;
+
+      var mensuelTotal = round2(totalForfait + totalFinMensuel + totalDcc);
+      var magasinTotal = round2(totalTaxesOptRetour + totalTaxesFinancement + avpaTtc + totalAncienAccepte);
+
+      return {
+        mensuelTotal: mensuelTotal,
+        totalForfait: totalForfait,
+        totalFinMensuel: totalFinMensuel,
+        totalDcc: totalDcc,
+        magasinTotal: magasinTotal,
+        totalTaxesOptRetour: totalTaxesOptRetour,
+        totalTaxesFinancement: totalTaxesFinancement,
+        avpaHt: avpaHt,
+        avpaTtc: avpaTtc,
+        totalAncienAccepte: totalAncienAccepte
+      };
+    }
+
+    function updateEstimation() {
+      var e = calculerEstimation();
+      if (estMensuelEl) estMensuelEl.textContent = formatArgentFr(e.mensuelTotal) + " $ / mois";
+      if (estMensuelDetailEl) {
+        var dm = [];
+        if (e.totalForfait > 0) dm.push("Forfait net " + formatArgentFr(e.totalForfait) + " $");
+        if (e.totalFinMensuel > 0) dm.push("Financement / PF " + formatArgentFr(e.totalFinMensuel) + " $");
+        if (e.totalDcc > 0) dm.push("DCC " + formatArgentFr(e.totalDcc) + " $");
+        estMensuelDetailEl.textContent = dm.length ? dm.join(" + ") : "Forfait net + financement mensuel + DCC";
+      }
+      if (estMagasinEl) estMagasinEl.textContent = formatArgentFr(e.magasinTotal) + " $";
+      if (estMagasinDetailEl) {
+        var dg = [];
+        if (e.totalTaxesOptRetour > 0) dg.push("Taxes Option retour " + formatArgentFr(e.totalTaxesOptRetour) + " $");
+        if (e.totalTaxesFinancement > 0) dg.push("Taxes financement 24 mois " + formatArgentFr(e.totalTaxesFinancement) + " $");
+        if (e.avpaTtc > 0) dg.push("Frais AVPA taxes incl. " + formatArgentFr(e.avpaTtc) + " $");
+        if (e.totalAncienAccepte > 0) dg.push("Ancien appareil " + formatArgentFr(e.totalAncienAccepte) + " $");
+        estMagasinDetailEl.textContent = dg.length ? dg.join(" + ") : "Taxes Option retour + taxes financement 24 mois + frais AVPA (avec taxes) + ancien appareil";
       }
     }
 
     function creditAdditionnel(prixGrille, optionRetour) {
-      var ttc = Math.round(prixGrille * TAXE_QC * 100) / 100;
-      var credit = Math.round((ttc - optionRetour) * 100) / 100;
+      var ttc = round2(prixGrille * TAXE_QC);
+      var credit = round2(ttc - optionRetour);
       if (credit < 0) return { credit: 0, negatif: true, ttc: ttc };
       return { credit: credit, negatif: false, ttc: ttc };
     }
@@ -1167,12 +1471,12 @@
 
     function defautPrixAvantTaxes(montantTTC) {
       if (!isFinite(montantTTC) || montantTTC < 0) return null;
-      return Math.round((montantTTC / TAXE_QC) * 100) / 100;
+      return round2(montantTTC / TAXE_QC);
     }
 
     function optionRetourOui(ligne) {
-      var r = $$(".opt-retour", ligne).filter(function (x) { return x.checked; })[0];
-      return !!(r && r.value === "oui");
+      var opt = parseMontant(($(".f-option-montant", ligne) || {}).value);
+      return isFinite(opt) && opt > 0;
     }
 
     function prixDefautCourant(ligne) {
@@ -1226,26 +1530,22 @@
     function updateVisibility() {
       var typeCompte = radio("type-compte");
       var typeTransVal = typeTransSelect ? typeTransSelect.value : "";
+      var modeAchatVal = modeAchatSelect ? modeAchatSelect.value : "";
       var nature = effectiveNature();
       var typeActivation = radio("type-activation");
 
       if (wrapTypeTransAutre) wrapTypeTransAutre.hidden = typeTransVal !== "__autre__";
-      var besoinNature = typeTransVal !== "" && typeTransVal !== "Activation" && typeTransVal !== "Renouvellement";
-      if (wrapNatureTrans) wrapNatureTrans.hidden = !besoinNature;
-      if (!besoinNature) {
-        $$('input[name="nature-transaction"]', form).forEach(function (r) { r.checked = false; });
-      }
+      if (wrapModeAchatAutre) wrapModeAchatAutre.hidden = modeAchatVal !== "__autre__";
 
-      wrapTypeAct.hidden = nature !== "activation";
-      if (nature !== "activation") {
+      var besoinTypeAct = typeTransVal === "Activation";
+      wrapTypeAct.hidden = !besoinTypeAct;
+      if (!besoinTypeAct) {
         $$('input[name="type-activation"]', form).forEach(function (r) { r.checked = false; });
-        typeActivation = "";
+        typeActivation = typeTransVal === "Ajout de ligne" ? "ajout" : "";
       }
 
       var montrerReste = false;
-      if (typeTransVal === "Renouvellement") {
-        montrerReste = true;
-      } else if (typeTransVal === "Activation") {
+      if (typeTransVal === "Activation") {
         montrerReste = typeActivation !== "";
       } else if (typeTransVal !== "") {
         montrerReste = true;
@@ -1263,12 +1563,15 @@
         choixAvpa.hidden = false;
       }
 
+      var isAvpa = radio("entente") === "avpa-byod";
+      if (wrapModeAchat) wrapModeAchat.hidden = isAvpa;
+      if (wrapModeAchatAutre && isAvpa) wrapModeAchatAutre.hidden = true;
+
       aideCompte.hidden = nature !== "activation";
 
       wrapNeq.hidden = !(typeCompte === "affaires" && nature === "activation" && typeActivation === "nouveau");
       wrapEvs.hidden = typeCompte !== "epp";
 
-      var isAvpa = radio("entente") === "avpa-byod";
       $$(".ligne", lignesEl).forEach(function (ligne) {
         syncForfaitChamps(ligne);
 
@@ -1287,18 +1590,13 @@
           champsTransfert.hidden = !(nature === "activation" && transfert && transfert.checked);
         }
 
-        var optRetour = $$(".opt-retour", ligne).filter(function (r) { return r.checked; });
-        var champsOptPay = $(".champs-option-paiement", ligne);
-        if (champsOptPay) {
-          champsOptPay.hidden = !(nature === "renouvellement" && optRetour.length && optRetour[0].value === "oui");
-        }
-
-        syncSoldesActuels(ligne);
+        syncAncienAppareil(ligne);
+        syncDccChamps(ligne);
 
         var optRetourNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
-        var champsOptNouvel = $(".champs-option-retour-nouvel", ligne);
-        if (champsOptNouvel) {
-          champsOptNouvel.hidden = !(optRetourNouvel && optRetourNouvel.value === "avec");
+        var champOptNouvel = $(".champ-option-retour-nouvel", ligne);
+        if (champOptNouvel) {
+          champOptNouvel.hidden = !(optRetourNouvel && optRetourNouvel.value === "avec");
         }
 
         var rachat = $(".chk-rachat", ligne);
@@ -1318,6 +1616,7 @@
         updatePrixGrille(ligne);
       });
 
+      updateEstimation();
       updateMemo();
       updateValidation();
     }
@@ -1333,7 +1632,17 @@
       if (v) block.push("Nom de l'utilisateur : " + v);
 
       v = valeurForfait(ligne);
-      if (v) block.push("Forfait choisi : " + v);
+      var pf = parsePrixForfait(($(".f-forfait-prix", ligne) || {}).value);
+      if (v || pf) {
+        var fLine = "Forfait choisi : " + (v || "Forfait");
+        if (pf) {
+          fLine += " — " + formatArgentFr(pf.net) + " $/mois";
+          if (pf.hasDiscount) {
+            fLine += " (" + formatArgentFr(pf.liste) + " $ - " + formatArgentFr(pf.rabais) + " $)";
+          }
+        }
+        block.push(fLine);
+      }
 
       if (!isAvpa) {
         v = valeurModele(ligne);
@@ -1342,20 +1651,27 @@
         if (v) block.push("Capacité : " + v);
         v = valeurCouleur(ligne);
         if (v) block.push("Couleur : " + v);
-        v = trim($(".f-imei", ligne));
-        if (v) block.push("IMEI 1 : " + v);
+        var enCmd = $(".chk-appareil-commande", ligne);
+        if (enCmd && enCmd.checked) {
+          block.push("Appareil en commande : Oui (IMEI à venir)");
+        } else {
+          v = trim($(".f-imei", ligne));
+          if (v) block.push("IMEI 1 : " + v);
+        }
         var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
         if (optNouvel) {
           if (optNouvel.value === "avec") {
             block.push("Option retour du nouvel appareil : Oui");
             var montOpt = parseMontant(($(".f-option-retour-nouvel", ligne) || {}).value);
             if (isFinite(montOpt)) block.push("Montant de l'Option retour du nouvel appareil : " + formatArgentFr(montOpt) + " $");
-            var montFin = parseMontant(($(".f-financement-nouvel", ligne) || {}).value);
-            if (isFinite(montFin)) block.push("Montant financement mensuel : " + formatArgentFr(montFin) + " $");
           } else {
             block.push("Option retour du nouvel appareil : Non");
           }
         }
+        var totalFin = parseMontant(($(".f-total-finance-nouvel", ligne) || {}).value);
+        if (isFinite(totalFin) && totalFin > 0) block.push("Montant total financé (24 mois) : " + formatArgentFr(totalFin) + " $");
+        var montFin = parseMontant(($(".f-financement-nouvel", ligne) || {}).value);
+        if (isFinite(montFin) && montFin > 0) block.push("Financement mensuel / Paiements faciles : " + formatArgentFr(montFin) + " $");
       }
 
       if (nature === "activation") {
@@ -1370,27 +1686,19 @@
       }
 
       if (nature === "renouvellement") {
-        var optRetour = $$(".opt-retour", ligne).filter(function (r) { return r.checked; })[0];
-        if (optRetour) {
-          if (optRetour.value === "oui") {
-            var parts = ["Option retour (ancien appareil) : Oui"];
-            var montantN = parseMontant(($(".f-option-montant", ligne) || {}).value);
-            if (isFinite(montantN)) parts.push(formatArgent(montantN) + " $ (taxes incl.)");
+        var anc = montantsAncienAppareil(ligne);
+        if (anc.total > 0) {
+          if (anc.opt > 0) {
+            var optTxt = "Option retour (ancien appareil) : " + formatArgentFr(anc.opt) + " $ (taxes incl.)";
             var pay = $$(".opt-paiement", ligne).filter(function (r) { return r.checked; })[0];
-            if (pay) parts.push(pay.value === "24-mois" ? "Financement 24 mois" : "En 1 coup");
-            block.push(parts.join(" – "));
-          } else {
-            block.push("Option retour (ancien appareil) : Non");
+            if (pay) optTxt += " – " + (pay.value === "24-mois" ? "Financement 24 mois" : "En 1 coup");
+            block.push(optTxt);
           }
-        }
-
-        var sa = parseMontant(($(".f-solde-appareil", ligne) || {}).value);
-        if (isFinite(sa) && sa > 0) block.push("Solde d'appareil actuel : " + formatArgentFr(sa) + " $");
-        var sp = parseMontant(($(".f-solde-pf", ligne) || {}).value);
-        if (isFinite(sp) && sp > 0) block.push("Solde Paiements faciles actuel : " + formatArgentFr(sp) + " $");
-        if (aSoldeActuelPositif(ligne)) {
-          var acc = $$(".opt-accepte-soldes", ligne).filter(function (r) { return r.checked; })[0];
-          if (acc) block.push("Accepte de payer les soldes actuels : " + (acc.value === "oui" ? "Oui" : "Non"));
+          if (anc.sa > 0) block.push("Solde d'appareil actuel : " + formatArgentFr(anc.sa) + " $");
+          if (anc.sp > 0) block.push("Solde Paiements faciles actuel : " + formatArgentFr(anc.sp) + " $");
+          block.push("Total sur l'ancien appareil : " + formatArgentFr(anc.total) + " $");
+          var acc = $$(".opt-accepte-ancien", ligne).filter(function (r) { return r.checked; })[0];
+          if (acc) block.push("Le client accepte de payer ces montants : " + (acc.value === "oui" ? "Oui" : "Non"));
         }
       }
 
@@ -1405,7 +1713,14 @@
       }
 
       var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
-      if (dcc) block.push("Protection DCC : " + dcc.value);
+      if (dcc) {
+        var dccTxt = "Protection DCC : " + dcc.value;
+        if (dcc.value === "Garder" || dcc.value === "Ajouter") {
+          var dccM = parseMontant(($(".f-dcc-montant", ligne) || {}).value);
+          if (isFinite(dccM)) dccTxt += " (" + formatArgentFr(dccM) + " $/mois)";
+        }
+        block.push(dccTxt);
+      }
 
       var blocEnc = $(".bloc-encontinu", ligne);
       if (blocEnc && isShown(blocEnc) && $(".chk-encontinu", ligne).checked) {
@@ -1422,6 +1737,7 @@
       var typeCompte = radio("type-compte");
       var typeTransRaw = typeTransSelect ? typeTransSelect.value : "";
       var typeTransNom = valeurTypeTransaction();
+      var modeAchatNom = valeurModeAchat();
       var nature = effectiveNature();
       var typeActivation = radio("type-activation");
       var entente = radio("entente");
@@ -1433,19 +1749,12 @@
         if (typeActivation === "nouveau") t += " — Ouverture d'un nouveau compte";
         else if (typeActivation === "ajout") t += " — Ajout d'une ligne dans un compte existant";
         out.push(t);
-      } else if (typeTransRaw === "Renouvellement") {
-        out.push("Type de transaction : Renouvellement");
       } else if (typeTransNom) {
-        var t2 = "Type de transaction : " + typeTransNom;
-        if (nature === "activation") {
-          t2 += " (Activation";
-          if (typeActivation === "nouveau") t2 += " — Ouverture d'un nouveau compte";
-          else if (typeActivation === "ajout") t2 += " — Ajout d'une ligne dans un compte existant";
-          t2 += ")";
-        } else if (nature === "renouvellement") {
-          t2 += " (Renouvellement)";
-        }
-        out.push(t2);
+        out.push("Type de transaction : " + typeTransNom);
+      }
+
+      if (modeAchatNom && entente !== "avpa-byod") {
+        out.push("Mode d'achat de l'appareil : " + modeAchatNom);
       }
 
       if (!reste.hidden) {
@@ -1489,16 +1798,17 @@
         });
 
         var extras = [];
-        var mensuel = parseMontant((document.getElementById("montant-mensuel-attendu") || {}).value);
-        if (isFinite(mensuel)) extras.push("Mensualité attendue (avant taxes) : " + formatArgentFr(mensuel) + " $");
-        var magasin = parseMontant((document.getElementById("montant-magasin-attendu") || {}).value);
-        if (isFinite(magasin)) extras.push("Montant à payer maintenant en magasin : " + formatArgentFr(magasin) + " $");
         var fraisAvpa = radio("frais-avpa");
         if (fraisAvpa) extras.push("Frais AVPA : " + fraisAvpa);
         var foncPerdues = radio("fonctions-perdues");
         if (foncPerdues) extras.push("Fonctions perdues expliquées : " + (foncPerdues === "oui" ? "Oui" : "Non"));
         var miseEnService = radio("mise-en-service");
         if (miseEnService) extras.push("Mise en service : " + (miseEnService === "maintenant" ? "Maintenant" : "Plus tard"));
+
+        var est = calculerEstimation();
+        extras.push("Estimation mensuelle (avant taxes) : " + formatArgentFr(est.mensuelTotal) + " $/mois");
+        extras.push("Estimation à payer en magasin (taxes QC incl.) : " + formatArgentFr(est.magasinTotal) + " $");
+
         if (extras.length) {
           if (out.length) out.push("");
           out = out.concat(extras);
@@ -1532,8 +1842,12 @@
       } else if (typeTransSelect.value === "__autre__" && !trim(inputTypeTransAutre)) {
         add("Type de transaction (préciser)", inputTypeTransAutre);
       }
-      if (isShown(wrapNatureTrans) && !radio("nature-transaction")) {
-        add("Opération liée (Activation ou Renouvellement)", $(".choix", wrapNatureTrans));
+      if (isShown(wrapModeAchat)) {
+        if (!modeAchatSelect || !modeAchatSelect.value) {
+          add("Mode d'achat de l'appareil", modeAchatSelect);
+        } else if (modeAchatSelect.value === "__autre__" && !trim(inputModeAchatAutre)) {
+          add("Mode d'achat (préciser)", inputModeAchatAutre);
+        }
       }
       if (isShown(wrapTypeAct) && !radio("type-activation")) {
         add("Ouverture ou ajout de ligne", $(".choix", wrapTypeAct));
@@ -1572,7 +1886,11 @@
             add("Forfait choisi", forfaitSel, g);
           } else if (forfaitSel.value === "__autre__") {
             var forfaitTxt = $(".f-forfait", ligne);
-            if (!trim(forfaitTxt)) add("Forfait choisi (préciser)", forfaitTxt, g);
+            if (!trim(forfaitTxt)) add("Autre forfait (nom)", forfaitTxt, g);
+          }
+          var forfaitPrixEl = $(".f-forfait-prix", ligne);
+          if (forfaitPrixEl && !parsePrixForfait(forfaitPrixEl.value)) {
+            add("Prix du forfait", forfaitPrixEl, g);
           }
 
           var appareils = $(".champs-appareil", ligne);
@@ -1593,23 +1911,14 @@
             }
             var coul = $(".f-couleur", ligne);
             if (coul && isShown(coul) && !trim(coul)) add("Couleur", coul, g);
-            var imei = $(".f-imei", ligne);
-            if (imei && isShown(imei) && !trim(imei)) add("IMEI 1 (sur la boîte)", imei, g);
 
             var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
             if (!optNouvel) {
               add("Option retour du nouvel appareil", $(".champs-appareil .choix", ligne) || $(".champs-appareil fieldset", ligne), g);
             } else if (optNouvel.value === "avec") {
-              var champsN = $(".champs-option-retour-nouvel", ligne);
-              if (champsN && isShown(champsN)) {
-                var montOptEl = $(".f-option-retour-nouvel", ligne);
-                if (montOptEl && !isFinite(parseMontant(montOptEl.value))) {
-                  add("Montant de l'Option retour du nouvel appareil $", montOptEl, g);
-                }
-                var montFinEl = $(".f-financement-nouvel", ligne);
-                if (montFinEl && !isFinite(parseMontant(montFinEl.value))) {
-                  add("Montant financement mensuel $", montFinEl, g);
-                }
+              var montOptEl = $(".f-option-retour-nouvel", ligne);
+              if (montOptEl && !isFinite(parseMontant(montOptEl.value))) {
+                add("Montant de l'Option retour du nouvel appareil $", montOptEl, g);
               }
             }
           }
@@ -1630,25 +1939,18 @@
 
           var blocRen = $(".bloc-renouvellement", ligne);
           if (blocRen && isShown(blocRen)) {
-            var optRetour = $$(".opt-retour", ligne).filter(function (r) { return r.checked; })[0];
-            if (!optRetour) {
-              add("Le client accepte de payer l'option retour (ancien appareil)?", $(".choix", blocRen), g);
-            } else if (optRetour.value === "oui") {
-              var payWrap = $(".champs-option-paiement", ligne);
-              if (payWrap && isShown(payWrap)) {
-                var montantEl = $(".f-option-montant", ligne);
-                if (montantEl && isShown(montantEl) && !isFinite(parseMontant(montantEl.value))) {
-                  add("Montant de l'option retour (taxes incluses) $", montantEl, g);
-                }
-                var pay = $$(".opt-paiement", ligne).filter(function (r) { return r.checked; })[0];
-                if (!pay) add("En 1 coup / Financement 24 mois", $(".choix", payWrap), g);
+            var anc = montantsAncienAppareil(ligne);
+            if (anc.total > 0) {
+              var wrapAccepte = $(".wrap-accepte-ancien", ligne);
+              var acc = $$(".opt-accepte-ancien", ligne).filter(function (r) { return r.checked; })[0];
+              if (wrapAccepte && isShown(wrapAccepte) && !acc) {
+                add("Le client accepte de payer les montants sur l'ancien appareil?", $(".choix", wrapAccepte), g);
               }
-            }
-
-            var wrapSoldes = $(".wrap-accepte-soldes", ligne);
-            if (wrapSoldes && isShown(wrapSoldes)) {
-              var acc = $$(".opt-accepte-soldes", ligne).filter(function (r) { return r.checked; })[0];
-              if (!acc) add("Le client accepte de payer ces soldes?", $(".choix", wrapSoldes), g);
+              var wrapPay = $(".wrap-option-paiement-ancien", ligne);
+              if (wrapPay && isShown(wrapPay) && anc.opt > 0 && acc && acc.value === "oui") {
+                var pay = $$(".opt-paiement", ligne).filter(function (r) { return r.checked; })[0];
+                if (!pay) add("Paiement de l'option retour (En 1 coup / Financement 24 mois)", $(".choix", wrapPay), g);
+              }
             }
           }
 
@@ -1670,6 +1972,11 @@
           var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
           if (!dcc) {
             add("Protection DCC", $(".bloc-dcc .choix", ligne), g);
+          } else if (dcc.value === "Garder" || dcc.value === "Ajouter") {
+            var dccM = $(".f-dcc-montant", ligne);
+            if (dccM && !isFinite(parseMontant(dccM.value))) {
+              add("Montant mensuel DCC $", dccM, g);
+            }
           }
 
           var blocEnc = $(".bloc-encontinu", ligne);
@@ -1681,14 +1988,6 @@
           }
         });
 
-        var mensuelEl = document.getElementById("montant-mensuel-attendu");
-        if (isShown(mensuelEl) && !isFinite(parseMontant(mensuelEl.value))) {
-          add("Mensualité totale attendue (avant taxes) $", mensuelEl);
-        }
-        var magasinEl = document.getElementById("montant-magasin-attendu");
-        if (isShown(magasinEl) && !isFinite(parseMontant(magasinEl.value))) {
-          add("Montant à payer maintenant en magasin $", magasinEl);
-        }
         if (!radio("frais-avpa")) {
           add("Frais AVPA", $(".choix", $('input[name="frais-avpa"]').closest("fieldset")));
         }
@@ -1770,21 +2069,36 @@
 
     form.addEventListener("change", function (e) {
       showErrors = true;
+      var t = e.target;
+      var ligne = t && t.closest && t.closest(".ligne");
+      if (ligne && t.classList.contains("f-forfait-select")) {
+        var opt = t.options[t.selectedIndex];
+        var dp = opt ? opt.getAttribute("data-prix") : "";
+        var prixEl = $(".f-forfait-prix", ligne);
+        if (prixEl && dp) prixEl.value = dp;
+      }
       updateVisibility();
-      var ligne = e.target && e.target.closest && e.target.closest(".ligne");
       if (ligne) updatePrixGrille(ligne);
     });
+
     form.addEventListener("input", function (e) {
       showErrors = true;
-      var ligne = e.target && e.target.closest && e.target.closest(".ligne");
+      var t = e.target;
+      var ligne = t && t.closest && t.closest(".ligne");
       if (ligne) {
-        if (e.target.classList.contains("f-rachat-prix")) applyPrixDefaut(ligne, true);
-        else if (e.target.classList.contains("f-option-montant")) applyPrixDefaut(ligne, false);
-        if (e.target.classList.contains("f-solde-appareil") || e.target.classList.contains("f-solde-pf")) {
-          syncSoldesActuels(ligne);
+        if (t.classList.contains("f-rachat-prix")) applyPrixDefaut(ligne, true);
+        else if (t.classList.contains("f-option-montant")) applyPrixDefaut(ligne, false);
+
+        if (t.classList.contains("f-forfait-prix")) syncForfaitChamps(ligne);
+        if (t.classList.contains("f-total-finance-nouvel")) syncFinancementNouvel(ligne, "total");
+        else if (t.classList.contains("f-financement-nouvel")) syncFinancementNouvel(ligne, "mensuel");
+
+        if (t.classList.contains("f-option-montant") || t.classList.contains("f-solde-appareil") || t.classList.contains("f-solde-pf")) {
+          syncAncienAppareil(ligne);
         }
         updatePrixGrille(ligne);
       }
+      updateEstimation();
       updateMemo();
       updateValidation();
     });
@@ -1796,20 +2110,21 @@
         t.classList.contains("f-rachat-prix") ||
         t.classList.contains("f-rachat-option") ||
         t.classList.contains("f-option-retour-nouvel") ||
+        t.classList.contains("f-total-finance-nouvel") ||
         t.classList.contains("f-financement-nouvel") ||
         t.classList.contains("f-solde-appareil") ||
         t.classList.contains("f-solde-pf") ||
-        t.id === "montant-mensuel-attendu" ||
-        t.id === "montant-magasin-attendu";
+        t.classList.contains("f-dcc-montant");
       if (!isMoney) return;
       var n = parseMontant(t.value);
       if (isFinite(n)) t.value = formatArgent(n);
       var ligne = t.closest && t.closest(".ligne");
       if (ligne) {
         applyPrixDefaut(ligne, t.classList.contains("f-rachat-prix"));
-        syncSoldesActuels(ligne);
+        syncAncienAppareil(ligne);
         updatePrixGrille(ligne);
       }
+      updateEstimation();
       updateMemo();
       updateValidation();
     }, true);
@@ -1883,6 +2198,7 @@
     });
 
     remplirSelectTypesTransaction();
+    remplirSelectModesAchat();
     addLine();
     updateVisibility();
   })();
