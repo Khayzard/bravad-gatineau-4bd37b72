@@ -490,10 +490,15 @@
               </div>
             </fieldset>
 
-            <label class="champ" for="numero-compte"># de compte
-              <input type="text" id="numero-compte" name="numero-compte" autocomplete="off" spellcheck="false">
-              <span class="aide" id="aide-compte" hidden>Compte temporaire créé par le rep (enquête de crédit déjà faite)</span>
-            </label>
+            <div class="grille">
+              <label class="champ" for="numero-compte"># de compte
+                <input type="text" id="numero-compte" name="numero-compte" autocomplete="off" spellcheck="false">
+                <span class="aide" id="aide-compte" hidden>Compte temporaire créé par le rep (enquête de crédit déjà faite)</span>
+              </label>
+              <label class="champ" for="code-postal-compte">Code postal du compte
+                <input type="text" id="code-postal-compte" name="code-postal-compte" autocomplete="off" spellcheck="false" autocapitalize="characters">
+              </label>
+            </div>
 
             <label class="champ" id="wrap-neq" hidden for="neq">NEQ
               <input type="text" id="neq" name="neq" autocomplete="off" spellcheck="false">
@@ -567,6 +572,21 @@
           <label class="champ champ-couleur">Couleur
             <input type="text" class="f-couleur" autocomplete="off">
           </label>
+          <fieldset class="plein">
+            <legend>Option retour du nouvel appareil</legend>
+            <div class="choix">
+              <label><input type="radio" class="opt-retour-nouvel" value="avec"> Avec Option retour</label>
+              <label><input type="radio" class="opt-retour-nouvel" value="sans"> Sans Option retour</label>
+            </div>
+          </fieldset>
+          <div class="sous-champs champs-option-retour-nouvel plein" hidden>
+            <label class="champ">Montant de l'Option retour du nouvel appareil $
+              <input type="text" class="f-option-retour-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="champ">Montant du financement du téléphone $
+              <input type="text" class="f-financement-nouvel" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+          </div>
         </div>
 
         <div class="pile bloc-activation">
@@ -707,6 +727,7 @@
       var node = tpl.content.firstElementChild.cloneNode(true);
       node.setAttribute("data-id", String(lineSeq));
       $$(".opt-retour", node).forEach(function (r) { r.name = "option-retour-" + lineSeq; });
+      $$(".opt-retour-nouvel", node).forEach(function (r) { r.name = "option-retour-nouvel-" + lineSeq; });
       $$(".opt-paiement", node).forEach(function (r) { r.name = "option-paiement-" + lineSeq; });
       $$(".opt-offre", node).forEach(function (r) { r.name = "offre-acceptee-" + lineSeq; });
       $$(".opt-encontinu", node).forEach(function (r) { r.name = "encontinu-" + lineSeq; });
@@ -1063,6 +1084,12 @@
           champsOptPay.hidden = !(transaction === "renouvellement" && optRetour.length && optRetour[0].value === "oui");
         }
 
+        var optRetourNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
+        var champsOptNouvel = $(".champs-option-retour-nouvel", ligne);
+        if (champsOptNouvel) {
+          champsOptNouvel.hidden = !(optRetourNouvel && optRetourNouvel.value === "avec");
+        }
+
         var rachat = $(".chk-rachat", ligne);
         var champsRachat = $(".champs-rachat", ligne);
         if (champsRachat) champsRachat.hidden = !(rachat && rachat.checked);
@@ -1104,6 +1131,18 @@
         if (v) block.push("Capacité : " + v);
         v = valeurCouleur(ligne);
         if (v) block.push("Couleur : " + v);
+        var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
+        if (optNouvel) {
+          if (optNouvel.value === "avec") {
+            block.push("Option retour du nouvel appareil : Oui");
+            var montOpt = parseMontant(($(".f-option-retour-nouvel", ligne) || {}).value);
+            if (isFinite(montOpt)) block.push("Montant de l'Option retour du nouvel appareil : " + formatArgentFr(montOpt) + " $");
+            var montFin = parseMontant(($(".f-financement-nouvel", ligne) || {}).value);
+            if (isFinite(montFin)) block.push("Montant du financement du téléphone : " + formatArgentFr(montFin) + " $");
+          } else {
+            block.push("Option retour du nouvel appareil : Non");
+          }
+        }
       }
 
       if (transaction === "activation") {
@@ -1179,6 +1218,8 @@
 
         var compte = trim(document.getElementById("numero-compte"));
         if (compte) out.push("# de compte : " + compte);
+        var postal = trim(document.getElementById("code-postal-compte"));
+        if (postal) out.push("Code postal du compte : " + postal);
 
         if (!wrapNeq.hidden) {
           var neq = trim(document.getElementById("neq"));
@@ -1240,6 +1281,8 @@
         }
         var compteEl = document.getElementById("numero-compte");
         if (isShown(compteEl) && !trim(compteEl)) add("# de compte", compteEl);
+        var postalEl = document.getElementById("code-postal-compte");
+        if (isShown(postalEl) && !trim(postalEl)) add("Code postal du compte", postalEl);
         if (isShown(wrapNeq) && !trim(document.getElementById("neq"))) {
           add("NEQ", document.getElementById("neq"));
         }
@@ -1275,6 +1318,22 @@
             }
             var coul = $(".f-couleur", ligne);
             if (coul && isShown(coul) && !trim(coul)) add("Couleur", coul, g);
+            var optNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
+            if (!optNouvel) {
+              add("Option retour du nouvel appareil", $(".champs-appareil .choix", ligne) || $(".champs-appareil fieldset", ligne), g);
+            } else if (optNouvel.value === "avec") {
+              var champsN = $(".champs-option-retour-nouvel", ligne);
+              if (champsN && isShown(champsN)) {
+                var montOptEl = $(".f-option-retour-nouvel", ligne);
+                if (montOptEl && !isFinite(parseMontant(montOptEl.value))) {
+                  add("Montant de l'Option retour du nouvel appareil $", montOptEl, g);
+                }
+                var montFinEl = $(".f-financement-nouvel", ligne);
+                if (montFinEl && !isFinite(parseMontant(montFinEl.value))) {
+                  add("Montant du financement du téléphone $", montFinEl, g);
+                }
+              }
+            }
           }
 
           var blocAct = $(".bloc-activation", ligne);
@@ -1423,7 +1482,7 @@
     form.addEventListener("blur", function (e) {
       var t = e.target;
       if (!t || !t.classList) return;
-      if (!t.classList.contains("f-option-montant") && !t.classList.contains("f-rachat-prix") && !t.classList.contains("f-rachat-option")) return;
+      if (!t.classList.contains("f-option-montant") && !t.classList.contains("f-rachat-prix") && !t.classList.contains("f-rachat-option") && !t.classList.contains("f-option-retour-nouvel") && !t.classList.contains("f-financement-nouvel")) return;
       var n = parseMontant(t.value);
       if (isFinite(n)) t.value = formatArgent(n);
       var ligne = t.closest(".ligne");
