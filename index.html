@@ -810,9 +810,6 @@
               <label><input type="radio" class="opt-dcc" value="Enlever"> Enlever</label>
               <label><input type="radio" class="opt-dcc" value="Aucune"> Aucune</label>
             </div>
-            <label class="champ wrap-dcc-montant" hidden style="margin-top: 10px;">Montant mensuel DCC $
-              <input type="text" class="f-dcc-montant" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="ex. 17,00">
-            </label>
           </fieldset>
 
           <div class="pile bloc-encontinu" hidden>
@@ -856,6 +853,9 @@
     var FORFAITS_CONNUS = [
       { nom: "Forfait 60 $", prix: "60" }
     ];
+
+    // Protection DCC mensuelle fixe (17 $/mois)
+    var DCC_MENSUEL = 17;
 
     // Taxes du Québec : TPS 5 % + TVQ 9,975 % = 14,975 %
     var TPS_QC = 0.05;
@@ -1243,17 +1243,6 @@
       }
     }
 
-    function syncDccChamps(ligne) {
-      var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
-      var wrap = $(".wrap-dcc-montant", ligne);
-      var show = !!(dcc && (dcc.value === "Garder" || dcc.value === "Ajouter"));
-      if (wrap) wrap.hidden = !show;
-      if (!show) {
-        var inp = $(".f-dcc-montant", ligne);
-        if (inp) inp.value = "";
-      }
-    }
-
     function syncFinancementNouvel(ligne, source) {
       var totalEl = $(".f-total-finance-nouvel", ligne);
       var mensEl = $(".f-financement-nouvel", ligne);
@@ -1322,8 +1311,7 @@
 
         var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
         if (dcc && (dcc.value === "Garder" || dcc.value === "Ajouter")) {
-          var dccM = parseMontant(($(".f-dcc-montant", ligne) || {}).value);
-          if (isFinite(dccM) && dccM > 0) totalDcc = round2(totalDcc + dccM);
+          totalDcc = round2(totalDcc + DCC_MENSUEL);
         }
 
         if (nature === "renouvellement") {
@@ -1591,7 +1579,6 @@
         }
 
         syncAncienAppareil(ligne);
-        syncDccChamps(ligne);
 
         var optRetourNouvel = $$(".opt-retour-nouvel", ligne).filter(function (r) { return r.checked; })[0];
         var champOptNouvel = $(".champ-option-retour-nouvel", ligne);
@@ -1716,8 +1703,7 @@
       if (dcc) {
         var dccTxt = "Protection DCC : " + dcc.value;
         if (dcc.value === "Garder" || dcc.value === "Ajouter") {
-          var dccM = parseMontant(($(".f-dcc-montant", ligne) || {}).value);
-          if (isFinite(dccM)) dccTxt += " (" + formatArgentFr(dccM) + " $/mois)";
+          dccTxt += " (" + formatArgentFr(DCC_MENSUEL) + " $/mois)";
         }
         block.push(dccTxt);
       }
@@ -1972,11 +1958,6 @@
           var dcc = $$(".opt-dcc", ligne).filter(function (r) { return r.checked; })[0];
           if (!dcc) {
             add("Protection DCC", $(".bloc-dcc .choix", ligne), g);
-          } else if (dcc.value === "Garder" || dcc.value === "Ajouter") {
-            var dccM = $(".f-dcc-montant", ligne);
-            if (dccM && !isFinite(parseMontant(dccM.value))) {
-              add("Montant mensuel DCC $", dccM, g);
-            }
           }
 
           var blocEnc = $(".bloc-encontinu", ligne);
@@ -2113,8 +2094,7 @@
         t.classList.contains("f-total-finance-nouvel") ||
         t.classList.contains("f-financement-nouvel") ||
         t.classList.contains("f-solde-appareil") ||
-        t.classList.contains("f-solde-pf") ||
-        t.classList.contains("f-dcc-montant");
+        t.classList.contains("f-solde-pf");
       if (!isMoney) return;
       var n = parseMontant(t.value);
       if (isFinite(n)) t.value = formatArgent(n);
