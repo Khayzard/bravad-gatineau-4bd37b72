@@ -624,8 +624,13 @@
                 <div class="estimation-carte">
                   <p class="estimation-libelle">Montant estimé à payer en magasin</p>
                   <p class="estimation-montant" id="est-magasin">0,00 $</p>
-                  <p class="estimation-detail" id="est-magasin-detail">Taxes Option retour + taxes financement 24 mois + frais AVPA (avec taxes) + ancien appareil</p>
+                  <p class="estimation-detail" id="est-magasin-detail">Taxes Option retour (nouvel appareil) + taxes financement 24 mois + frais AVPA (avec taxes) + soldes ancien appareil</p>
                 </div>
+              </div>
+              <div class="estimation-carte" id="carte-prochaine-facture" hidden style="margin-top: 12px;">
+                <p class="estimation-libelle">À facturer sur la prochaine facture TELUS</p>
+                <p class="estimation-montant" id="est-prochaine-facture">0,00 $</p>
+                <p class="estimation-detail" id="est-prochaine-facture-detail">Option retour de l'ancien appareil (facturée sur la prochaine facture TELUS, non payée aujourd'hui en boutique)</p>
               </div>
               <p class="aide" style="margin-top: 10px;">Estimation automatique pour vérification (TPS 5 % + TVQ 9,975 % = 14,975 %). Toujours valider les montants exacts au portail avant soumission.</p>
             </div>
@@ -735,7 +740,7 @@
         <div class="pile bloc-renouvellement" hidden>
           <div class="sous-champs bloc-ancien-appareil">
             <p class="libelle plein" style="margin: 0;">Montants à payer sur l'ancien appareil</p>
-            <label class="champ">Option retour (ancien appareil, taxes incl.) $
+            <label class="champ">Option retour (ancien appareil — facturée sur la prochaine facture TELUS) $
               <input type="text" class="f-option-montant" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0,00">
             </label>
             <label class="champ">Solde d'appareil actuel $
@@ -750,7 +755,7 @@
             <span class="aide plein" style="margin-top: 0;">Laisser vide ou à 0 s'il n'y a aucun montant à payer sur l'ancien appareil.</span>
             <div class="pile plein wrap-option-paiement-ancien" hidden>
               <fieldset>
-                <legend>Paiement de l'option retour (ancien appareil)</legend>
+                <legend>Paiement de l'option retour (ancien appareil — facturée sur la prochaine facture TELUS)</legend>
                 <div class="choix">
                   <label><input type="radio" class="opt-paiement" value="1-coup"> En 1 coup</label>
                   <label><input type="radio" class="opt-paiement" value="24-mois"> Financement 24 mois</label>
@@ -890,6 +895,9 @@
     var estMensuelDetailEl = document.getElementById("est-mensuel-detail");
     var estMagasinEl = document.getElementById("est-magasin");
     var estMagasinDetailEl = document.getElementById("est-magasin-detail");
+    var carteProchaineFactureEl = document.getElementById("carte-prochaine-facture");
+    var estProchaineFactureEl = document.getElementById("est-prochaine-facture");
+    var estProchaineFactureDetailEl = document.getElementById("est-prochaine-facture-detail");
     var btnAjouter = document.getElementById("btn-ajouter");
     var btnCopier = document.getElementById("btn-copier");
     var btnEffacer = document.getElementById("btn-effacer");
@@ -1228,7 +1236,13 @@
       var show = effectiveNature() === "renouvellement" && m.total > 0;
       if (wrapAccepte) wrapAccepte.hidden = !show;
       if (legendAccepte) {
-        legendAccepte.textContent = "Le client accepte de payer ces montants (total " + formatArgentFr(m.total) + " $)?";
+        if (m.opt > 0 && m.sa === 0 && m.sp === 0) {
+          legendAccepte.textContent = "Le client accepte de payer l'Option retour de l'ancien appareil (" + formatArgentFr(m.opt) + " $, facturée sur la prochaine facture TELUS)?";
+        } else if (m.opt > 0) {
+          legendAccepte.textContent = "Le client accepte de payer ces montants (total " + formatArgentFr(m.total) + " $, dont " + formatArgentFr(m.opt) + " $ d'Option retour facturée sur la prochaine facture TELUS)?";
+        } else {
+          legendAccepte.textContent = "Le client accepte de payer ces montants (total " + formatArgentFr(m.total) + " $)?";
+        }
       }
       if (!show) {
         $$(".opt-accepte-ancien", ligne).forEach(function (r) { r.checked = false; });
@@ -1277,7 +1291,8 @@
 
       var totalTaxesOptRetour = 0;
       var totalTaxesFinancement = 0;
-      var totalAncienAccepte = 0;
+      var totalAncienSoldesAcceptes = 0;
+      var totalOptRetourProchaineFacture = 0;
 
       $$(".ligne", lignesEl).forEach(function (ligne) {
         if (!isShown(ligne)) return;
@@ -1318,7 +1333,9 @@
           var anc = montantsAncienAppareil(ligne);
           var acc = $$(".opt-accepte-ancien", ligne).filter(function (r) { return r.checked; })[0];
           if (anc.total > 0 && acc && acc.value === "oui") {
-            totalAncienAccepte = round2(totalAncienAccepte + anc.total);
+            var soldesAncien = round2(anc.sa + anc.sp);
+            if (soldesAncien > 0) totalAncienSoldesAcceptes = round2(totalAncienSoldesAcceptes + soldesAncien);
+            if (anc.opt > 0) totalOptRetourProchaineFacture = round2(totalOptRetourProchaineFacture + anc.opt);
           }
         }
       });
@@ -1329,7 +1346,7 @@
       var avpaTtc = avpaHt > 0 ? round2(avpaHt * TAXE_QC) : 0;
 
       var mensuelTotal = round2(totalForfait + totalFinMensuel + totalDcc);
-      var magasinTotal = round2(totalTaxesOptRetour + totalTaxesFinancement + avpaTtc + totalAncienAccepte);
+      var magasinTotal = round2(totalTaxesOptRetour + totalTaxesFinancement + avpaTtc + totalAncienSoldesAcceptes);
 
       return {
         mensuelTotal: mensuelTotal,
@@ -1341,7 +1358,8 @@
         totalTaxesFinancement: totalTaxesFinancement,
         avpaHt: avpaHt,
         avpaTtc: avpaTtc,
-        totalAncienAccepte: totalAncienAccepte
+        totalAncienSoldesAcceptes: totalAncienSoldesAcceptes,
+        totalOptRetourProchaineFacture: totalOptRetourProchaineFacture
       };
     }
 
@@ -1361,8 +1379,14 @@
         if (e.totalTaxesOptRetour > 0) dg.push("Taxes Option retour " + formatArgentFr(e.totalTaxesOptRetour) + " $");
         if (e.totalTaxesFinancement > 0) dg.push("Taxes financement 24 mois " + formatArgentFr(e.totalTaxesFinancement) + " $");
         if (e.avpaTtc > 0) dg.push("Frais AVPA taxes incl. " + formatArgentFr(e.avpaTtc) + " $");
-        if (e.totalAncienAccepte > 0) dg.push("Ancien appareil " + formatArgentFr(e.totalAncienAccepte) + " $");
-        estMagasinDetailEl.textContent = dg.length ? dg.join(" + ") : "Taxes Option retour + taxes financement 24 mois + frais AVPA (avec taxes) + ancien appareil";
+        if (e.totalAncienSoldesAcceptes > 0) dg.push("Soldes ancien appareil " + formatArgentFr(e.totalAncienSoldesAcceptes) + " $");
+        estMagasinDetailEl.textContent = dg.length ? dg.join(" + ") : "Taxes Option retour (nouvel appareil) + taxes financement 24 mois + frais AVPA (avec taxes) + soldes ancien appareil";
+      }
+      if (carteProchaineFactureEl) {
+        carteProchaineFactureEl.hidden = !(e.totalOptRetourProchaineFacture > 0);
+      }
+      if (estProchaineFactureEl) {
+        estProchaineFactureEl.textContent = formatArgentFr(e.totalOptRetourProchaineFacture) + " $";
       }
     }
 
@@ -1676,7 +1700,7 @@
         var anc = montantsAncienAppareil(ligne);
         if (anc.total > 0) {
           if (anc.opt > 0) {
-            var optTxt = "Option retour (ancien appareil) : " + formatArgentFr(anc.opt) + " $ (taxes incl.)";
+            var optTxt = "Option retour (ancien appareil) : " + formatArgentFr(anc.opt) + " $ (facturée sur la prochaine facture TELUS)";
             var pay = $$(".opt-paiement", ligne).filter(function (r) { return r.checked; })[0];
             if (pay) optTxt += " – " + (pay.value === "24-mois" ? "Financement 24 mois" : "En 1 coup");
             block.push(optTxt);
@@ -1685,7 +1709,12 @@
           if (anc.sp > 0) block.push("Solde Paiements faciles actuel : " + formatArgentFr(anc.sp) + " $");
           block.push("Total sur l'ancien appareil : " + formatArgentFr(anc.total) + " $");
           var acc = $$(".opt-accepte-ancien", ligne).filter(function (r) { return r.checked; })[0];
-          if (acc) block.push("Le client accepte de payer ces montants : " + (acc.value === "oui" ? "Oui" : "Non"));
+          if (acc) {
+            var accTxt = anc.opt > 0
+              ? "Le client accepte de payer ces montants (Option retour facturée sur la prochaine facture TELUS) : "
+              : "Le client accepte de payer ces montants : ";
+            block.push(accTxt + (acc.value === "oui" ? "Oui" : "Non"));
+          }
         }
       }
 
@@ -1794,6 +1823,9 @@
         var est = calculerEstimation();
         extras.push("Estimation mensuelle (avant taxes) : " + formatArgentFr(est.mensuelTotal) + " $/mois");
         extras.push("Estimation à payer en magasin (taxes QC incl.) : " + formatArgentFr(est.magasinTotal) + " $");
+        if (est.totalOptRetourProchaineFacture > 0) {
+          extras.push("Option retour (ancien appareil) sur la prochaine facture TELUS : " + formatArgentFr(est.totalOptRetourProchaineFacture) + " $");
+        }
 
         if (extras.length) {
           if (out.length) out.push("");
